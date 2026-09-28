@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/jpeg" href="grupamar-logo.jpg">
+  <title>GrupaMar • Comparador de Planificaciones (Hedyla vs. Especialista)</title>
+  
+  <style>
+    /* ==========================================================================
+       LIBRO DE ESTILO GRUPAMAR - VARIABLES Y SISTEMA DE DISEÑO
+       Colores oficiales:
+       - Azul Oscuro: #091197 (pantone Blue 072 C / RAL 5002)
+       - Azul Claro: #03A9EC (pantone 299 C / RAL 5012)
+       - Blanco: #FFFFFF (fondo prioritario en toda pieza gráfica)
+       - Gris Claro: #F6F6F6 (secciones secundarias, fichas, tarjetas)
+       - Naranja: #F75600 (resalte MUY puntual)
+       Formas:
+       - Cantos redondeados obligatorios (~24px - 30px en tarjetas, 9999px / 12px en botones)
+       - Prohibido esquinas a 90°
+       Tipografía:
+       - Basier Square / Arial Nova / Arial
+       ========================================================================== */
+    :root {
+      --gm-blue-dark: #091197;
+      --gm-blue-light: #03A9EC;
+      --gm-white: #FFFFFF;
+      --gm-gray-light: #F6F6F6;
+      --gm-orange: #F75600;
+      
+      --gm-blue-dark-hover: #070c77;
+      --gm-blue-light-hover: #0294d1;
+      --gm-blue-light-bg: #e6f6fd;
+      --gm-orange-bg: #feeee6;
+      
+      --text-main: #1A1F36;
+      --text-muted: #5E6C84;
+      --text-light: #8993A4;
+      --border-color: #E2E8F0;
+      --border-light: #EDF2F7;
+      
+      --radius-card: 26px;
+      --radius-sub: 18px;
+      --radius-pill: 9999px;
+      --radius-btn: 14px;
+      
+      --shadow-sm: 0 2px 6px rgba(9, 17, 151, 0.04);
+      --shadow-card: 0 10px 25px -5px rgba(9, 17, 151, 0.06), 0 4px 10px -2px rgba(9, 17, 151, 0.03);
+      --shadow-hover: 0 18px 32px -4px rgba(9, 17, 151, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Basier Square', 'Arial Nova', Arial, sans-serif;
+      background-color: var(--gm-white);
+      color: var(--text-main);
+      line-height: 1.5;
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --------------------------------------------------------------------------
+       HEADER & BRANDING
+       -------------------------------------------------------------------------- */
+    header {
+      background: var(--gm-white);
+      border-bottom: 2px solid var(--gm-gray-light);
+      padding: 16px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .grupamar-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .grupamar-logo-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(9, 17, 151, 0.08);
+      padding: 2px;
+    }
+
+    .logo-text-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-brand-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .logo-descriptor {
+      font-size: 11px;
+      font-weight: 600;
+      font-style: italic;
+      color: var(--gm-blue-light);
+      letter-spacing: 0.8px;
+      margin-top: 3px;
+      text-transform: uppercase;
+    }
+
+    .brand-separator {
+      width: 1px;
+      height: 38px;
+      background: var(--border-color);
+    }
+
+    .app-title-group h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .tag-badge {
+      background: var(--gm-blue-light-bg);
+      color: var(--gm-blue-light);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid rgba(3, 169, 236, 0.25);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: var(--radius-btn);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: var(--gm-white);
+      border-color: var(--gm-blue-light);
+      color: var(--gm-blue-light);
+    }
+    .btn-secondary:hover {
+      background: var(--gm-blue-light-bg);
+      border-color: var(--gm-blue-light-hover);
+      color: var(--gm-blue-light-hover);
+    }
+
+    .btn-primary {
+      background: var(--gm-blue-dark);
+      color: var(--gm-white);
+      box-shadow: 0 4px 12px rgba(9, 17, 151, 0.2);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--gm-blue-dark-hover);
+      box-shadow: 0 6px 16px rgba(9, 17, 151, 0.3);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* --------------------------------------------------------------------------
+       MAIN WRAPPER
+       -------------------------------------------------------------------------- */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 40px 60px;
+    }
+
+    /* --------------------------------------------------------------------------
+       UPLOAD SECTION
+       -------------------------------------------------------------------------- */
+    .upload-card {
+      background: var(--gm-gray-light);
+      border-radius: var(--radius-card);
+      padding: 26px 30px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .upload-header {
+      margin-bottom: 18px;
+    }
+
+    .upload-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .upload-header p {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 860px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dropzone {
+      background: var(--gm-white);
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-sub);
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--gm-blue-light);
+      background: var(--gm-blue-light-bg);
+      transform: translateY(-2px);
+    }
+
+    .dropzone.loaded {
+      border-style: solid;
+      border-color: var(--gm-blue-dark);
+      background: #fafbff;
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .dz-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-pill);
+      background: var(--gm-gray-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      color: var(--gm-blue-dark);
+    }
+
+    .dropzone.loaded .dz-icon-wrapper {
+      background: var(--gm-blue-dark);
+      color: var(--gm-white);
+    }
+
+    .dz-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .badge-init {
+      background: var(--gm-blue-light-bg);
+      color: var(--gm-blue-light);
+    }
+
+    .badge-fin {
+      background: #ebeeff;
+      color: var(--gm-blue-dark);
+    }
+
+    .dz-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      margin-bottom: 4px;
+    }
+
+    .dz-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .dz-file-name {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .upload-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .upload-tip {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .upload-tip strong {
+      color: var(--gm-blue-dark);
+    }
+
+    /* --------------------------------------------------------------------------
+       EXECUTIVE VERDICT CARD (#091197 Azul Oscuro GrupaMar)
+       -------------------------------------------------------------------------- */
+    .verdict-banner {
+      background-color: var(--gm-blue-dark);
+      border-radius: var(--radius-card);
+      padding: 30px 34px;
+      color: var(--gm-white);
+      margin-bottom: 26px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 32px;
+      align-items: center;
+      box-shadow: 0 14px 28px rgba(9, 17, 151, 0.25);
+    }
+
+    @media (max-width: 800px) {
+      .verdict-banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .score-box {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-sub);
+      padding: 20px 16px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .score-value {
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--gm-blue-light);
+      line-height: 1;
+    }
+
+    .score-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 8px;
+    }
+
+    .verdict-text-group h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gm-white);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--gm-blue-light);
+      color: var(--gm-white);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .verdict-paragraph {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      margin-bottom: 14px;
+      max-width: 900px;
+    }
+
+    .verdict-paragraph strong {
+      color: var(--gm-blue-light);
+    }
+
+    .verdict-chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .v-chip {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gm-white);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .v-chip strong {
+      color: var(--gm-blue-light);
+    }
+
+    /* --------------------------------------------------------------------------
+       TOP 6 KPIS
+       -------------------------------------------------------------------------- */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 1200px) {
+      .kpi-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .kpi-card {
+      background: var(--gm-white);
+      border-radius: var(--radius-sub);
+      padding: 16px 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      box-shadow: var(--shadow-card);
+      transform: translateY(-2px);
+      border-color: var(--gm-blue-light);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--gm-blue-dark);
+    }
+
+    .kpi-card.accent-light::before { background: var(--gm-blue-light); }
+    .kpi-card.accent-orange::before { background: var(--gm-orange); }
+
+    .kpi-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .kpi-number {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+      margin: 6px 0 3px;
+      line-height: 1;
+    }
+
+    .kpi-bottom {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gm-blue-light);
+    }
+
+    .kpi-bottom.text-orange { color: var(--gm-orange); }
+    .kpi-bottom.text-dark { color: var(--gm-blue-dark); }
+
+    /* --------------------------------------------------------------------------
+       MATRIX IMPACT SECTION
+       -------------------------------------------------------------------------- */
+    .matrix-panel {
+      background: var(--gm-white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 24px 28px;
+      margin-bottom: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .matrix-boxes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .matrix-boxes {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .m-box {
+      background: var(--gm-gray-light);
+      border-radius: var(--radius-sub);
+      padding: 16px 18px;
+      border: 1px solid var(--border-light);
+    }
+
+    .m-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .m-box-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .m-val-init {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .m-val-init strong {
+      color: var(--text-main);
+    }
+
+    .m-val-fin {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+    }
+
+    .delta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .delta-green { background: #e6f7ef; color: #0d8a55; }
+    .delta-orange { background: var(--gm-orange-bg); color: var(--gm-orange); }
+    .delta-blue { background: var(--gm-blue-light-bg); color: var(--gm-blue-light); }
+
+    /* --------------------------------------------------------------------------
+       TABLE CONTAINERS
+       -------------------------------------------------------------------------- */
+    .table-container {
+      background: var(--gm-white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      margin-bottom: 26px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-headbar {
+      padding: 16px 24px;
+      background: var(--gm-gray-light);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .tab-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 7px 15px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--gm-white);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn:hover {
+      background: #fafafa;
+      color: var(--gm-blue-dark);
+    }
+
+    .tab-btn.active {
+      background: var(--gm-blue-dark);
+      color: var(--gm-white);
+      border-color: var(--gm-blue-dark);
+      box-shadow: 0 2px 8px rgba(9, 17, 151, 0.2);
+    }
+
+    .search-input-wrap {
+      position: relative;
+      min-width: 280px;
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      padding: 8px 14px 8px 36px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      outline: none;
+      background: var(--gm-white);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .search-input-wrap input:focus {
+      border-color: var(--gm-blue-light);
+      box-shadow: 0 0 0 3px rgba(3, 169, 236, 0.15);
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gm-blue-light);
+      width: 15px;
+      height: 15px;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    thead th {
+      background: var(--gm-blue-dark);
+      color: var(--gm-white);
+      padding: 12px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--gm-gray-light);
+    }
+
+    tbody tr:hover {
+      background-color: #f0f4ff;
+    }
+
+    /* GrupaMar Vehicle Header Bar in Orders Table */
+    .group-row {
+      background-color: #eaf1fd !important;
+      color: var(--gm-blue-dark);
+      border-top: 2px solid var(--gm-blue-light);
+      border-bottom: 2px solid #cbd5e1;
+    }
+
+    .group-cell {
+      padding: 12px 16px !important;
+    }
+
+    .veh-banner-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .veh-main-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .veh-capacity-badges {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cap-badge {
+      background: #ffffff;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid rgba(9, 17, 151, 0.15);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cap-badge strong {
+      color: var(--gm-blue-dark);
+    }
+
+    .cap-badge .pct {
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    .pct-high { background: var(--gm-orange-bg); color: var(--gm-orange); }
+    .pct-ok { background: #e6f7ef; color: #0d8a55; }
+    .pct-norm { background: var(--gm-blue-light-bg); color: var(--gm-blue-light); }
+
+    /* Tags for Palets and Bultos */
+    .tag-palet {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      background: var(--gm-blue-light-bg);
+      color: var(--gm-blue-light);
+      border: 1px solid rgba(3, 169, 236, 0.3);
+    }
+
+    .tag-palet.empty {
+      background: transparent;
+      color: var(--text-light);
+      border: 1px dashed var(--border-color);
+    }
+
+    .tag-bulto {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      background: #f1f5f9;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .tag-bulto.empty {
+      background: transparent;
+      color: var(--text-light);
+      border: 1px dashed var(--border-color);
+    }
+
+    /* Badges */
+    .gm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-mantenido {
+      background: var(--gm-blue-light-bg);
+      color: var(--gm-blue-light);
+      border: 1px solid rgba(3, 169, 236, 0.3);
+    }
+
+    .badge-reasignado {
+      background: var(--gm-orange-bg);
+      color: var(--gm-orange);
+      border: 1px solid rgba(247, 86, 0, 0.3);
+    }
+
+    .badge-nuevo {
+      background: #e6f7ef;
+      color: #0d8a55;
+      border: 1px solid #b7ebd3;
+    }
+
+    .badge-sinasignar {
+      background: #fee7e7;
+      color: #cf1322;
+      border: 1px solid #ffa39e;
+    }
+
+    .badge-adr {
+      background: var(--gm-orange);
+      color: var(--gm-white);
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      margin-left: 6px;
+    }
+
+    .veh-chip {
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      background: var(--gm-white);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      display: inline-block;
+    }
+
+    .code-albaran {
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+      font-size: 12px;
+      letter-spacing: 0.2px;
+    }
+
+    .code-expedicion {
+      font-weight: 600;
+      color: #0284c7;
+      background: #f0f9ff;
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid #bae6fd;
+      font-size: 11px;
+      display: inline-block;
+    }
+
+    .empty-block {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 42px;
+      margin-bottom: 12px;
+      color: var(--gm-blue-light);
+    }
+
+    .empty-block h3 {
+      font-size: 16px;
+      color: var(--gm-blue-dark);
+      margin-bottom: 6px;
+    }
+
+    footer {
+      background: var(--gm-gray-light);
+      border-top: 1px solid var(--border-color);
+      padding: 22px 40px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    footer strong {
+      color: var(--gm-blue-dark);
+    }
+
+    /* Print styles A4 Landscape */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        background: #ffffff !important;
+        font-size: 9px;
+      }
+      header, .upload-card, .table-headbar, footer, .header-actions {
+        display: none !important;
+      }
+      main {
+        padding: 0;
+        max-width: 100%;
+      }
+      .verdict-banner {
+        background: #091197 !important;
+        color: #ffffff !important;
+        box-shadow: none !important;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        page-break-inside: avoid;
+      }
+      .kpi-row {
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .kpi-card {
+        padding: 8px 10px;
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+      }
+      .kpi-number {
+        font-size: 16px;
+      }
+      .matrix-panel {
+        box-shadow: none;
+        padding: 12px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        page-break-inside: avoid;
+      }
+      .table-container {
+        box-shadow: none;
+        border: 1px solid #cbd5e1;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        page-break-inside: auto;
+      }
+      table {
+        page-break-inside: auto;
+      }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      thead {
+        display: table-header-group;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header GrupaMar Oficial -->
+  <header>
+    <div class="header-container">
+      <div class="brand-group">
+        <a href="#" class="grupamar-logo" title="GrupaMar - Transporte y Logística">
+          <img src="grupamar-logo.jpg" alt="GrupaMar" class="grupamar-logo-img">
+          <div class="logo-text-block">
+            <span class="logo-brand-name">GrupaMar</span>
+            <span class="logo-descriptor">Transporte y Logística</span>
+          </div>
+        </a>
+
+        <div class="brand-separator"></div>
+
+        <div class="app-title-group">
+          <h1>Auditoría de Planificaciones <span class="tag-badge">Hedyla vs Especialista</span></h1>
+          <p>Herramienta analítica de evaluación de algoritmos de optimización de rutas</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="btn-toggle-upload" style="display: none;" title="Mostrar u ocultar panel de carga de archivos">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Cargar Nuevos Archivos</span>
+        </button>
+        <button class="btn btn-primary" id="btn-print" style="display: none;" onclick="window.print()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir / Guardar PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Upload Section -->
+    <section class="upload-card" id="upload-panel">
+      <div class="upload-header">
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Carga de Archivos de Planificación
+        </h2>
+        <p>Sube el archivo HTML inicial (algoritmo Hedyla) y el archivo HTML final (revisión humana del especialista de tráfico GrupaMar).</p>
+      </div>
+
+      <div class="upload-grid">
+        <!-- Dropzone Inicial -->
+        <div class="dropzone" id="dz-inicial">
+          <input type="file" id="file-inicial" accept=".html,.htm">
+          <div class="dz-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <span class="dz-badge badge-init">Plan Inicial</span>
+          <div class="dz-title">Hedyla Automático</div>
+          <div class="dz-hint">Arrastra aquí el HTML del plan original o haz clic</div>
+          <div class="dz-file-name" id="name-inicial" style="display: none;"></div>
+        </div>
+
+        <!-- Dropzone Final -->
+        <div class="dropzone" id="dz-final">
+          <input type="file" id="file-final" accept=".html,.htm">
+          <div class="dz-icon-wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <span class="dz-badge badge-fin">Plan Final</span>
+          <div class="dz-title">Especialista GrupaMar</div>
+          <div class="dz-hint">Arrastra aquí el HTML con las rutas validadas</div>
+          <div class="dz-file-name" id="name-final" style="display: none;"></div>
+        </div>
+      </div>
+
+      <div class="upload-footer">
+        <div class="upload-tip">
+          💡 <strong>GrupaMar Auditoría:</strong> Desglosa palets vs bultos y compara la ocupación real vs capacidades máximas de cada vehículo.
+        </div>
+        <button class="btn btn-primary" id="btn-compare" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Ejecutar Comparación</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Results Area -->
+    <div id="results-area" style="display: none;">
+
+      <!-- 1. Executive Verdict Card (#091197 Azul Oscuro GrupaMar) -->
+      <div class="verdict-banner">
+        <div class="score-box">
+          <div class="score-value" id="score-percent">--%</div>
+          <div class="score-title">Eficacia Inicial</div>
+        </div>
+        <div class="verdict-text-group">
+          <h2>
+            <span id="verdict-title">Auditoría de Planificación de Transporte</span>
+            <span class="status-pill" id="verdict-rating">Evaluación</span>
+          </h2>
+          <p class="verdict-paragraph" id="verdict-summary">
+            Generando comparativa algorítmica...
+          </p>
+          <div class="verdict-chips" id="verdict-badges">
+            <!-- Dynamic Chips -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Top 6 KPIs GrupaMar -->
+      <div class="kpi-row">
+        <!-- KPI 1 -->
+        <div class="kpi-card">
+          <div class="kpi-label">Fecha Oficial</div>
+          <div class="kpi-number" id="kpi-date">--/--/----</div>
+          <div class="kpi-bottom" id="kpi-zone">Operativa Detectada</div>
+        </div>
+        <!-- KPI 2 -->
+        <div class="kpi-card accent-light">
+          <div class="kpi-label">Total Pedidos</div>
+          <div class="kpi-number" id="kpi-total-orders">0</div>
+          <div class="kpi-bottom text-dark" id="kpi-orders-delta">0 Δ vs Inicial</div>
+        </div>
+        <!-- KPI 3 -->
+        <div class="kpi-card">
+          <div class="kpi-label">Carga Registrada</div>
+          <div class="kpi-number" id="kpi-weight">0 kg</div>
+          <div class="kpi-bottom" id="kpi-pallets">0 Pallets Eq.</div>
+        </div>
+        <!-- KPI 4 -->
+        <div class="kpi-card accent-light">
+          <div class="kpi-label">Rutas Planificadas</div>
+          <div class="kpi-number" id="kpi-routes">0 Rutas</div>
+          <div class="kpi-bottom text-dark" id="kpi-routes-delta">0 Δ vs Inicial</div>
+        </div>
+        <!-- KPI 5 -->
+        <div class="kpi-card accent-orange">
+          <div class="kpi-label">Reasignaciones Ruta</div>
+          <div class="kpi-number" id="kpi-reassigned-pct">0%</div>
+          <div class="kpi-bottom text-orange" id="kpi-reassigned-count">0 Reagrupados</div>
+        </div>
+        <!-- KPI 6 -->
+        <div class="kpi-card" id="kpi-unassigned-card">
+          <div class="kpi-label">Pedidos Sin Asignar</div>
+          <div class="kpi-number" id="kpi-unassigned">0</div>
+          <div class="kpi-bottom" id="kpi-unassigned-sub">0 Rescatados</div>
+        </div>
+      </div>
+
+      <!-- 3. Operational & Cost Matrix -->
+      <div class="matrix-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#03A9EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Impacto Operativo y Costes (Inicial vs. Final)
+          </div>
+        </div>
+        <div class="matrix-boxes">
+          <!-- Cost -->
+          <div class="m-box">
+            <div class="m-box-title">Coste Total Estimado</div>
+            <div class="m-box-body">
+              <div class="m-val-init">Inicial: <strong id="m-cost-init">0 €</strong></div>
+              <div class="m-val-fin" id="m-cost-final">0 €</div>
+            </div>
+            <div class="delta-badge" id="m-cost-delta">--</div>
+          </div>
+          <!-- Distance -->
+          <div class="m-box">
+            <div class="m-box-title">Distancia en Ruta</div>
+            <div class="m-box-body">
+              <div class="m-val-init">Inicial: <strong id="m-dist-init">0 Km</strong></div>
+              <div class="m-val-fin" id="m-dist-final">0 Km</div>
+            </div>
+            <div class="delta-badge" id="m-dist-delta">--</div>
+          </div>
+          <!-- Pallet Occupancy -->
+          <div class="m-box">
+            <div class="m-box-title">Ocupación Pallets</div>
+            <div class="m-box-body">
+              <div class="m-val-init">Inicial: <strong id="m-pal-init">0</strong></div>
+              <div class="m-val-fin" id="m-pal-final">0</div>
+            </div>
+            <div class="delta-badge delta-blue" id="m-pal-delta">--</div>
+          </div>
+          <!-- Schedule -->
+          <div class="m-box">
+            <div class="m-box-title">Ventana Horaria Operativa</div>
+            <div class="m-box-body">
+              <div class="m-val-init">Inicial: <strong id="m-sched-init">--:--</strong></div>
+              <div class="m-val-fin" id="m-sched-final" style="font-size: 14px;">--:--</div>
+            </div>
+            <div class="delta-badge delta-blue" id="m-sched-delta">Horario planificado</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Fleet and Route Breakdown With Capacities -->
+      <div class="table-container">
+        <div class="table-headbar">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#091197" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            Identificación de Flota, Capacidades y Asignación de Rutas
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted);">
+            Ocupación y capacidades de carga de cada vehículo en el Plan Final
+          </span>
+        </div>
+        <div class="table-scroll">
+          <table id="table-routes">
+            <thead>
+              <tr>
+                <th>Ruta Final</th>
+                <th>Conductor</th>
+                <th>Matrícula / ID</th>
+                <th>Tipo Vehículo</th>
+                <th>Capacidad Máxima</th>
+                <th>Carga Palets (Ocupación)</th>
+                <th>Carga Peso (Ocupación)</th>
+                <th>Pedidos</th>
+                <th>Km</th>
+                <th>Coste</th>
+                <th>Estado y Observación</th>
+              </tr>
+            </thead>
+            <tbody id="routes-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. 100% Orders Traceability Table (Separate PALETS & BULTOS Columns) -->
+      <div class="table-container">
+        <div class="table-headbar">
+          <div class="tab-filters" id="order-filters">
+            <button class="tab-btn active" data-filter="all">Todos (<span id="count-all">0</span>)</button>
+            <button class="tab-btn" data-filter="mantenido">Mantenidos (<span id="count-mantenido">0</span>)</button>
+            <button class="tab-btn" data-filter="reasignado">Reasignados (<span id="count-reasignado">0</span>)</button>
+            <button class="tab-btn" data-filter="nuevo">Nuevos Asignados (<span id="count-nuevo">0</span>)</button>
+            <button class="tab-btn" data-filter="sinasignar">Sin Asignar (<span id="count-sinasignar">0</span>)</button>
+          </div>
+          <div class="search-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="order-search" placeholder="Buscar albarán, cliente, vehículo...">
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="table-orders">
+            <thead>
+              <tr>
+                <th>Albarán</th>
+                <th>Expedición</th>
+                <th>Cliente / Destino</th>
+                <th style="text-align: center;">Palets</th>
+                <th style="text-align: center;">Bultos</th>
+                <th>Ruta Inicial</th>
+                <th>Ruta Final</th>
+                <th>Matrícula Final</th>
+                <th>Tipo Vehículo</th>
+                <th>Tipo Movimiento</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Empty State -->
+    <div id="initial-state" class="empty-block">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <h3>Ninguna auditoría activa</h3>
+      <p>Sube el archivo HTML inicial (algoritmo Hedyla) y el archivo final (especialista de tráfico GrupaMar) y pulsa en <strong>"Ejecutar Comparación"</strong>.</p>
+    </div>
+
+  </main>
+
+  <!-- Footer GrupaMar Oficial -->
+  <footer>
+    <p>
+      &copy; <strong>GrupaMar</strong> &bull; Transporte y Logística &bull; Sistema de Auditoría y Comparación de Rutas.
+    </p>
+  </footer>
+
+  <script>
+    // State
+    let fileInitialContent = null;
+    let fileFinalContent = null;
+    let initialFileName = '';
+    let finalFileName = '';
+    let parsedInitial = null;
+    let parsedFinal = null;
+    let comparisonResult = null;
+    let currentFilter = 'all';
+
+    // DOM Elements
+    const dzInicial = document.getElementById('dz-inicial');
+    const dzFinal = document.getElementById('dz-final');
+    const inputInicial = document.getElementById('file-inicial');
+    const inputFinal = document.getElementById('file-final');
+    const nameInicial = document.getElementById('name-inicial');
+    const nameFinal = document.getElementById('name-final');
+    const btnCompare = document.getElementById('btn-compare');
+    // btnDemo removed
+    const btnPrint = document.getElementById('btn-print');
+    const resultsArea = document.getElementById('results-area');
+    const initialState = document.getElementById('initial-state');
+
+    // Drag and Drop
+    function setupDropzone(dz, input, isInitial) {
+      ['dragenter', 'dragover'].forEach(name => {
+        dz.addEventListener(name, (e) => {
+          e.preventDefault();
+          dz.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        dz.addEventListener(name, (e) => {
+          e.preventDefault();
+          dz.classList.remove('dragover');
+        });
+      });
+
+      dz.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFile(e.dataTransfer.files[0], isInitial);
+        }
+      });
+
+      input.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          handleFile(e.target.files[0], isInitial);
+        }
+      });
+    }
+
+    setupDropzone(dzInicial, inputInicial, true);
+    setupDropzone(dzFinal, inputFinal, false);
+
+    function handleFile(file, isInitial) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        if (isInitial) {
+          fileInitialContent = content;
+          initialFileName = file.name;
+          dzInicial.classList.add('loaded');
+          nameInicial.innerHTML = `✓ ${file.name}`;
+          nameInicial.style.display = 'flex';
+        } else {
+          fileFinalContent = content;
+          finalFileName = file.name;
+          dzFinal.classList.add('loaded');
+          nameFinal.innerHTML = `✓ ${file.name}`;
+          nameFinal.style.display = 'flex';
+        }
+        checkReady();
+      };
+      reader.readAsText(file);
+    }
+
+    function checkReady() {
+      if (fileInitialContent && fileFinalContent) {
+        btnCompare.disabled = false;
+      }
+    }
+
+    // Helper: Separate Palets and Bultos from string (e.g., "1/1", "0/2", "1/12", "5/5")
+    function parsePalletsAndBultos(rawString) {
+      if (!rawString) return { palets: '-', bultos: '-' };
+      
+      const parts = rawString.split(',').map(s => s.trim());
+      let totalPalets = 0;
+      let totalBultosSueltos = 0;
+      let isMixedOrPureBultos = false;
+
+      for (const part of parts) {
+        const slash = part.match(/(\d+)\s*\/\s*(\d+)/);
+        if (slash) {
+          const p = parseInt(slash[1], 10);
+          const b = parseInt(slash[2], 10);
+          
+          if (p > 0) {
+            totalPalets += p;
+          }
+          
+          // When b > p (e.g. 1/12 -> 1 pallet with 12 boxes): carries both
+          if (b > p) {
+            totalBultosSueltos += b;
+            isMixedOrPureBultos = true;
+          } else if (p === 0 && b > 0) {
+            // Pure loose boxes without pallet (e.g. 0/1, 0/2)
+            totalBultosSueltos += b;
+            isMixedOrPureBultos = true;
+          }
+        } else {
+          const num = parseInt(part, 10);
+          if (!isNaN(num)) {
+            totalPalets += num;
+          }
+        }
+      }
+
+      return {
+        palets: totalPalets > 0 ? totalPalets : '-',
+        bultos: isMixedOrPureBultos && totalBultosSueltos > 0 ? totalBultosSueltos : '-'
+      };
+    }
+
+    // Helper to resolve clean, distinct Albarán (T...) and Expedición (E...)
+    function resolveCodes(order) {
+      let albaran = order.albaran || '';
+      let expedicion = order.expedicion || '';
+      const code = (order.code || '').trim();
+
+      if (!albaran && !expedicion) {
+        if (code.startsWith('T')) {
+          albaran = code;
+          expedicion = 'E' + code.slice(1);
+        } else if (code.startsWith('E')) {
+          expedicion = code;
+          albaran = 'T' + code.slice(1);
+        } else {
+          albaran = code;
+          expedicion = '-';
+        }
+      } else if (!albaran && expedicion) {
+        albaran = 'T' + expedicion.slice(1);
+      } else if (albaran && !expedicion) {
+        expedicion = 'E' + albaran.slice(1);
+      }
+
+      return { albaran, expedicion };
+    }
+
+    // --- Parser Engine ---
+    function parseHedyla(html, label) {
+      const data = {
+        label,
+        title: '',
+        date: '',
+        schedule: '',
+        totalOrders: 0,
+        totalRoutes: 0,
+        cost: 0,
+        distanceKm: 0,
+        weightKg: 0,
+        pallets: 0,
+        vehicles: [],
+        routes: [],
+        ordersMap: new Map(),
+        unassignedOrders: []
+      };
+
+      // 1. Title & Date
+      const titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+      if (titleMatch) {
+        data.title = titleMatch[1].trim();
+        const dm = data.title.match(/(\d{2}\/\d{2}\/\d{4})/);
+        if (dm) data.date = dm[1];
+      }
+
+      // 2. Global KPIs
+      const getTooltip = (name) => {
+        const rx = new RegExp(`data-tooltip-content="${name}"[^>]*>[\\s\\S]*?<span>([^<]+)<`, 'i');
+        const m = html.match(rx);
+        return m ? m[1].trim() : '';
+      };
+
+      data.schedule = getTooltip('Hora de inicio y final');
+      data.totalOrders = parseInt((getTooltip('Pedidos planificados') || '0').replace(/\D/g, ''), 10) || 0;
+      data.totalRoutes = parseInt((getTooltip('Rutas') || '0').replace(/\D/g, ''), 10) || 0;
+      data.cost = parseFloat((getTooltip('Coste') || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+      data.distanceKm = parseFloat((getTooltip('Distancia') || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+      data.weightKg = parseFloat((getTooltip('Peso') || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+      data.pallets = parseFloat((getTooltip('Pallets equivalentes') || '0').replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+
+      // 3. Vehicles Used
+      const vehTooltip = html.match(/data-tooltip-html="([^"]*Vehículos utilizados[^"]*)"/i);
+      if (vehTooltip) {
+        const raw = vehTooltip[1].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+        const pms = raw.match(/<p style="margin: 0">([^<]+)<\/p>/g) || [];
+        data.vehicles = pms.map(p => p.replace(/<[^>]+>/g, '').trim());
+      }
+
+      // 4. Extract all Vehicle Capacities from tooltips
+      const vehicleCapacities = [];
+      const kgCapRx = /data-tooltip-content="Hasta\s*([\d.,]+)\s*Kg\s*de carga máxima[^,]+,\s*la capacidad máxima del vehículo es de\s*([\d.,]+)\s*Kg"/g;
+      let km;
+      while ((km = kgCapRx.exec(html)) !== null) {
+        vehicleCapacities.push({
+          pos: km.index,
+          loadKg: km[1],
+          maxKg: km[2]
+        });
+      }
+
+      const palCapRx = /data-tooltip-content="Hasta\s*([\d.,]+)\s*de carga máxima[^,]+,\s*la capacidad máxima del vehículo es de\s*([\d.,]+)\s*"/g;
+      let pm;
+      let pIdx = 0;
+      while ((pm = palCapRx.exec(html)) !== null) {
+        if (vehicleCapacities[pIdx]) {
+          vehicleCapacities[pIdx].loadPallets = pm[1];
+          vehicleCapacities[pIdx].maxPallets = pm[2];
+        }
+        pIdx++;
+      }
+
+      // 5. Build Real Client Names & Delivery Metadata Dictionary
+      const cardParts = html.split('data-dnd-card="true"');
+      const clientCards = [];
+      const loadCards = [];
+
+      for (let cIdx = 1; cIdx < cardParts.length; cIdx++) {
+        const p = cardParts[cIdx].substring(0, 3000);
+
+        const tooltips = (p.match(/data-tooltip-content="([^"]+)"/g) || []).map(t => t.replace(/data-tooltip-content="|"/g, ''));
+        let client = '';
+        for (const t of tooltips) {
+          if (/^[\d\/,\s]+$/.test(t)) continue;
+          if (t.startsWith('Hasta ') || t.includes('carga máxima')) continue;
+          if (/^(?:[ET][A-Z0-9]{9,11}(?:,\s*)?)+$/.test(t)) continue;
+          if (t === 'Pedidos' || t.startsWith('tooltip-')) continue;
+          client = t.trim();
+          break;
+        }
+
+        if (!client) {
+          const spans = (p.match(/<span>([^<]+)<\/span>/g) || []).map(s => s.replace(/<[^>]+>/g, '').trim());
+          for (const s of spans) {
+            if (/^\d+$/.test(s)) continue;
+            if (/^\d{2}:\d{2}$/.test(s)) continue;
+            if (s === 'Nº:' || s === 'ADR') continue;
+            if (/^(?:[ET][A-Z0-9]{9,11}(?:,\s*)?)+$/.test(s)) continue;
+            if (s.length > 2 && s !== 'TENERIFE' && s !== 'PALMA') {
+              client = s;
+              break;
+            }
+          }
+        }
+
+        const multiExpMatch = p.match(/data-tooltip-content="([ET][A-Z0-9,\s]{18,})"/);
+        if (multiExpMatch) {
+          const list = multiExpMatch[1].split(',').map(s => s.trim());
+          const unitsMatch = p.match(/data-tooltip-content="([\d\/,\s]{5,})"/);
+          const unitsList = unitsMatch ? unitsMatch[1].split(',').map(s => s.trim()) : [];
+          loadCards.push({ exps: list, units: unitsList });
+        } else if (client) {
+          clientCards.push({ client, p });
+        }
+      }
+
+      const orderMetadataMap = new Map();
+      let clientCardPointer = 0;
+
+      loadCards.forEach((lc) => {
+        lc.exps.forEach((exp, eIdx) => {
+          const cc = clientCards[clientCardPointer++];
+          const clientName = cc ? cc.client : (data.title.includes('Mallorca') ? 'PALMA DE MALLORCA' : 'SANTA CRUZ DE TENERIFE');
+          const rawUnits = lc.units[eIdx] || '1/1';
+          orderMetadataMap.set(exp, { client: clientName, rawUnits });
+        });
+      });
+
+      // 6. Routes and Orders
+      const cleanText = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                            .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
+                            .replace(/<[^>]+>/g, ' ')
+                            .replace(/\s+/g, ' ');
+
+      const rxRoute = /([A-ZÁÉÍÓÚÑ\s.]{4,})\s*\((\d{4,5})\)\s*([0-9]{4}\s*[A-Z]{3}|[0-9]{5}|virtual-traction-\d+)\s*(Publicada|Borrador)\s*([A-Z0-9]{10,12})?/g;
+      let rm;
+      const detectedRoutes = [];
+      while ((rm = rxRoute.exec(cleanText)) !== null) {
+        if (rm[1].includes('TENERIFE') || rm[1].includes('PALMA')) continue;
+        detectedRoutes.push({
+          driver: rm[1].trim(),
+          driverId: rm[2].trim(),
+          plate: rm[3].trim(),
+          status: rm[4].trim(),
+          routeCode: rm[5] || '',
+          pos: rm.index
+        });
+      }
+
+      for (let i = 0; i < detectedRoutes.length; i++) {
+        const cur = detectedRoutes[i];
+        const nextPos = i + 1 < detectedRoutes.length ? detectedRoutes[i + 1].pos : cleanText.length;
+        const chunk = cleanText.substring(cur.pos, nextPos);
+
+        const vTypeMatch = chunk.match(/([A-F]-\s*HASTA\s*\d+(?:\.\d+)?\s*TN|[A-F]-\s*FURGONETA|TRACTORA[A-Z\s]*)/i);
+        const vehicleType = vTypeMatch ? vTypeMatch[1].trim() : 'C- HASTA 18 TN';
+
+        const kmMatch = chunk.match(/([\d.,]+)\s*Km/);
+        const routeKm = kmMatch ? parseFloat(kmMatch[1].replace(/\./g, '').replace(',', '.')) : 0;
+
+        const costMatch = chunk.match(/([\d.,]+)\s*€/);
+        const routeCost = costMatch ? parseFloat(costMatch[1].replace(/\./g, '').replace(',', '.')) : 0;
+
+        // Associate capacity from matched tooltips
+        const caps = vehicleCapacities[i] || {};
+        const loadKg = caps.loadKg || '0';
+        const maxKg = caps.maxKg || '18.000';
+        const loadPallets = caps.loadPallets || '0';
+        const maxPallets = caps.maxPallets || '18';
+
+        // Occupancy calculation
+        const numLoadKg = parseFloat(loadKg.replace(/\./g, '').replace(',', '.')) || 0;
+        const numMaxKg = parseFloat(maxKg.replace(/\./g, '').replace(',', '.')) || 1;
+        const pctKg = Math.round((numLoadKg / numMaxKg) * 100);
+
+        const numLoadPal = parseFloat(loadPallets.replace(/\./g, '').replace(',', '.')) || 0;
+        const numMaxPal = parseFloat(maxPallets.replace(/\./g, '').replace(',', '.')) || 1;
+        const pctPal = Math.round((numLoadPal / numMaxPal) * 100);
+
+        const routeObj = {
+          id: cur.routeCode || `R-${cur.plate}`,
+          driver: cur.driver,
+          driverId: cur.driverId,
+          plate: cur.plate,
+          status: cur.status,
+          vehicleType,
+          km: routeKm,
+          cost: routeCost,
+          loadKg,
+          maxKg,
+          pctKg,
+          loadPallets,
+          maxPallets,
+          pctPal,
+          orderCodes: []
+        };
+
+        const codeMatches = chunk.match(/[A-Z]{3,4}\d{7}/g) || [];
+        const uniqueInRoute = [...new Set(codeMatches.filter(c => c !== cur.routeCode && !c.startsWith('HSCT')))];
+
+        uniqueInRoute.forEach(code => {
+          routeObj.orderCodes.push(code);
+
+          const meta = orderMetadataMap.get(code);
+          let clientName = meta ? meta.client : '';
+          let rawUnitsStr = meta ? meta.rawUnits : '1/1';
+          let isAdr = false;
+
+          if (!clientName) {
+            const rawIdx = html.indexOf(code);
+            if (rawIdx !== -1) {
+              const rawSub = html.substring(Math.max(0, rawIdx - 350), Math.min(html.length, rawIdx + 200));
+              const tooltips = (rawSub.match(/data-tooltip-content="([^"]+)"/g) || []).map(t => t.replace(/data-tooltip-content="|"/g, ''));
+              for (const t of tooltips) {
+                if (/^[\d\/,\s]+$/.test(t)) continue;
+                if (t.startsWith('Hasta ') || t.includes('carga máxima')) continue;
+                if (/^(?:[ET][A-Z0-9]{9,11}(?:,\s*)?)+$/.test(t)) continue;
+                if (t === 'Pedidos' || t.startsWith('tooltip-')) continue;
+                clientName = t.trim();
+                break;
+              }
+              if (!clientName) {
+                const spanMatch = rawSub.match(/<span>([A-ZÁÉÍÓÚÑ0-9\s.,-]{4,35})<\/span>/i);
+                if (spanMatch && !spanMatch[1].includes(':') && !/^(?:[ET][A-Z0-9]{9,11}(?:,\s*)?)+$/.test(spanMatch[1])) {
+                  clientName = spanMatch[1].trim();
+                }
+              }
+              isAdr = rawSub.includes('ADR');
+            }
+          }
+
+          if (!clientName || /^(?:[ET][A-Z0-9]{9,11}(?:,\s*)?)+$/.test(clientName)) {
+            clientName = data.title.includes('Mallorca') ? 'PALMA DE MALLORCA' : 'SANTA CRUZ DE TENERIFE';
+          }
+
+          const parsedUnits = parsePalletsAndBultos(rawUnitsStr);
+
+          data.ordersMap.set(code, {
+            code,
+            client: clientName,
+            palets: parsedUnits.palets,
+            bultos: parsedUnits.bultos,
+            routeId: routeObj.id,
+            driver: cur.driver,
+            plate: cur.plate,
+            vehicleType,
+            loadKg,
+            maxKg,
+            pctKg,
+            loadPallets,
+            maxPallets,
+            pctPal,
+            isAdr,
+            isUnassigned: false
+          });
+        });
+
+        data.routes.push(routeObj);
+      }
+
+      // 6. Unassigned Orders
+      const unassignedIdx = cleanText.indexOf('No asignados');
+      if (unassignedIdx !== -1) {
+        const unChunk = cleanText.substring(unassignedIdx, unassignedIdx + 6000);
+        const unRx = /data-tooltip-content="([^"]+)"[\s\S]*?<span>(\d+)\s*<\/span>[\s\S]*?<span>(\d+)\s*<\/span>[\s\S]*?<span>(\d+)\s*Kg<\/span>/g;
+        let um;
+        let uIndex = 0;
+        while ((um = unRx.exec(unChunk)) !== null) {
+          uIndex++;
+          const unItem = {
+            code: `UNASG-${uIndex}`,
+            client: um[1].trim(),
+            palets: um[3].trim(),
+            bultos: um[2].trim(),
+            weightKg: parseInt(um[4], 10),
+            routeId: 'Sin Asignar',
+            driver: 'Sin Vehículo',
+            plate: 'Sin Vehículo',
+            vehicleType: 'Sin Vehículo',
+            loadKg: '0',
+            maxKg: '0',
+            pctKg: 0,
+            loadPallets: '0',
+            maxPallets: '0',
+            pctPal: 0,
+            isAdr: false,
+            isUnassigned: true
+          };
+          data.unassignedOrders.push(unItem);
+          data.ordersMap.set(unItem.code, unItem);
+        }
+      }
+
+      return data;
+    }
+
+    // --- Comparative Analysis ---
+    function comparePlans(init, fin) {
+      const ordersComparison = [];
+      let mantenidosCount = 0;
+      let reasignadosCount = 0;
+      let nuevosAsignadosCount = 0;
+      let sinAsignarCount = 0;
+
+      fin.ordersMap.forEach((finOrder, code) => {
+        const initOrder = init.ordersMap.get(code);
+
+        let movementType = 'mantenido';
+        let note = '';
+
+        if (finOrder.isUnassigned) {
+          movementType = 'sinasignar';
+          sinAsignarCount++;
+          note = 'Permanece sin asignar en plan final';
+        } else if (!initOrder || initOrder.isUnassigned) {
+          movementType = 'nuevo';
+          nuevosAsignadosCount++;
+          note = 'Rescatado por especialista y asignado a ruta';
+        } else if (initOrder.routeId === finOrder.routeId || initOrder.plate === finOrder.plate) {
+          movementType = 'mantenido';
+          mantenidosCount++;
+          note = 'Mantenido en la misma ruta/vehículo inicial';
+        } else {
+          movementType = 'reasignado';
+          reasignadosCount++;
+          note = `Reubicado de ${initOrder.plate || initOrder.routeId} a ${finOrder.plate}`;
+        }
+
+        const codes = resolveCodes(finOrder);
+        ordersComparison.push({
+          code: finOrder.code,
+          albaran: codes.albaran,
+          expedicion: codes.expedicion,
+          client: finOrder.client,
+          palets: finOrder.palets,
+          bultos: finOrder.bultos,
+          routeInit: initOrder ? initOrder.routeId : 'Sin Asignar',
+          routeFinal: finOrder.routeId,
+          vehicleFinal: finOrder.plate,
+          vehicleType: finOrder.vehicleType,
+          driver: finOrder.driver,
+          loadKg: finOrder.loadKg,
+          maxKg: finOrder.maxKg,
+          pctKg: finOrder.pctKg,
+          loadPallets: finOrder.loadPallets,
+          maxPallets: finOrder.maxPallets,
+          pctPal: finOrder.pctPal,
+          isAdr: finOrder.isAdr,
+          movementType,
+          note
+        });
+      });
+
+      init.ordersMap.forEach((initOrder, code) => {
+        if (!fin.ordersMap.has(code) && !initOrder.isUnassigned) {
+          const initCodes = resolveCodes(initOrder);
+          ordersComparison.push({
+            code: initOrder.code,
+            albaran: initCodes.albaran,
+            expedicion: initCodes.expedicion,
+            client: initOrder.client,
+            palets: initOrder.palets,
+            bultos: initOrder.bultos,
+            routeInit: initOrder.routeId,
+            routeFinal: 'Eliminado',
+            vehicleFinal: 'Sin Vehículo',
+            vehicleType: 'Sin Vehículo',
+            driver: 'Sin Conductor',
+            loadKg: '0',
+            maxKg: '0',
+            pctKg: 0,
+            loadPallets: '0',
+            maxPallets: '0',
+            pctPal: 0,
+            isAdr: initOrder.isAdr,
+            movementType: 'eliminado',
+            note: 'Descartado del plan por el especialista'
+          });
+        }
+      });
+
+      const totalOrdersFinal = fin.totalOrders || fin.ordersMap.size;
+      const totalInitial = init.totalOrders || init.ordersMap.size;
+      const totalHandled = mantenidosCount + reasignadosCount;
+      const efficiencyScore = totalHandled > 0 ? Math.round((mantenidosCount / totalHandled) * 100) : 100;
+      const reassignPercent = totalHandled > 0 ? ((reasignadosCount / totalHandled) * 100).toFixed(1) : 0;
+
+      return {
+        efficiencyScore,
+        reassignPercent,
+        mantenidosCount,
+        reasignadosCount,
+        nuevosAsignadosCount,
+        sinAsignarCount,
+        ordersComparison,
+        costDiff: fin.cost - init.cost,
+        kmDiff: fin.distanceKm - init.distanceKm,
+        routesDiff: fin.totalRoutes - init.totalRoutes,
+        ordersDiff: totalOrdersFinal - totalInitial
+      };
+    }
+
+    // --- Render View GrupaMar ---
+    function renderComparison(init, fin, comp) {
+      document.getElementById('score-percent').textContent = `${comp.efficiencyScore}%`;
+
+      const verdictTitle = document.getElementById('verdict-title');
+      const verdictRating = document.getElementById('verdict-rating');
+      const verdictSummary = document.getElementById('verdict-summary');
+      const verdictBadges = document.getElementById('verdict-badges');
+
+      let ratingText = 'Excelente';
+      if (comp.efficiencyScore < 50) {
+        ratingText = 'Intervención Crítica';
+      } else if (comp.efficiencyScore < 70) {
+        ratingText = 'Intervención Moderada';
+      } else if (comp.efficiencyScore < 85) {
+        ratingText = 'Buena Eficacia';
+      }
+
+      verdictRating.textContent = ratingText;
+
+      const dateStr = fin.date || init.date || 'Fecha actual';
+      verdictTitle.innerHTML = `Planificación ${dateStr} &bull; Auditoría GrupaMar`;
+
+      let summaryText = `El planificador automático de Hedyla obtuvo una <strong>fidelidad del ${comp.efficiencyScore}%</strong>. `;
+      summaryText += `De un total de <strong>${fin.totalOrders} pedidos</strong>, el especialista de tráfico mantuvo <strong>${comp.mantenidosCount}</strong> en su asignación original y reasignó <strong>${comp.reasignadosCount} entregas (${comp.reassignPercent}%)</strong> para solventar accesos y optimizar la carga útil del vehículo.`;
+
+      if (comp.nuevosAsignadosCount > 0) {
+        summaryText += ` Además, el especialista <strong>rescató ${comp.nuevosAsignadosCount} pedido(s)</strong> que habían quedado sin asignar.`;
+      }
+      verdictSummary.innerHTML = summaryText;
+
+      verdictBadges.innerHTML = `
+        <div class="v-chip"><span>Mantenidos:</span> <strong>${comp.mantenidosCount}</strong></div>
+        <div class="v-chip"><span>Reasignados:</span> <strong>${comp.reasignadosCount}</strong></div>
+        <div class="v-chip"><span>Rescatados:</span> <strong>${comp.nuevosAsignadosCount}</strong></div>
+        <div class="v-chip"><span>Sin Asignar:</span> <strong>${comp.sinAsignarCount}</strong></div>
+      `;
+
+      // Top 6 KPIs
+      document.getElementById('kpi-date').textContent = dateStr;
+      document.getElementById('kpi-zone').textContent = fin.title.includes('Tenerife') ? 'Operativa Tenerife' : (fin.title.includes('Mallorca') ? 'Operativa Mallorca' : 'Grupaje GrupaMar');
+      
+      document.getElementById('kpi-total-orders').textContent = fin.totalOrders;
+      document.getElementById('kpi-orders-delta').textContent = `${comp.ordersDiff >= 0 ? '+' : ''}${comp.ordersDiff} Δ vs Inicial`;
+
+      document.getElementById('kpi-weight').textContent = `${(fin.weightKg || 0).toLocaleString('es-ES')} kg`;
+      document.getElementById('kpi-pallets').textContent = `${fin.pallets || 0} Pallets Eq.`;
+
+      document.getElementById('kpi-routes').textContent = `${fin.totalRoutes} Rutas`;
+      document.getElementById('kpi-routes-delta').textContent = `${comp.routesDiff >= 0 ? '+' : ''}${comp.routesDiff} Δ vs Inicial`;
+
+      document.getElementById('kpi-reassigned-pct').textContent = `${comp.reassignPercent}%`;
+      document.getElementById('kpi-reassigned-count').textContent = `${comp.reasignadosCount} Reagrupados`;
+
+      document.getElementById('kpi-unassigned').textContent = comp.sinAsignarCount;
+      const unSubEl = document.getElementById('kpi-unassigned-sub');
+      if (comp.sinAsignarCount === 0) {
+        unSubEl.textContent = '100% Pedidos Asignados';
+        unSubEl.className = 'kpi-bottom text-dark';
+      } else {
+        unSubEl.textContent = `${comp.sinAsignarCount} Pendiente(s)`;
+        unSubEl.className = 'kpi-bottom text-orange';
+      }
+
+      // Matrix
+      document.getElementById('m-cost-init').textContent = `${init.cost.toFixed(2)} €`;
+      document.getElementById('m-cost-final').textContent = `${fin.cost.toFixed(2)} €`;
+      const costDeltaEl = document.getElementById('m-cost-delta');
+      const cDiff = comp.costDiff;
+      costDeltaEl.textContent = `${cDiff >= 0 ? '+' : ''}${cDiff.toFixed(2)} € (${((cDiff / (init.cost || 1)) * 100).toFixed(1)}%)`;
+      costDeltaEl.className = `delta-badge ${cDiff <= 0 ? 'delta-green' : 'delta-orange'}`;
+
+      document.getElementById('m-dist-init').textContent = `${init.distanceKm} Km`;
+      document.getElementById('m-dist-final').textContent = `${fin.distanceKm} Km`;
+      const kmDeltaEl = document.getElementById('m-dist-delta');
+      const kDiff = comp.kmDiff;
+      kmDeltaEl.textContent = `${kDiff >= 0 ? '+' : ''}${kDiff.toFixed(0)} Km (${((kDiff / (init.distanceKm || 1)) * 100).toFixed(1)}%)`;
+      kmDeltaEl.className = `delta-badge ${kDiff <= 0 ? 'delta-green' : 'delta-orange'}`;
+
+      document.getElementById('m-pal-init').textContent = `${init.pallets} p.`;
+      document.getElementById('m-pal-final').textContent = `${fin.pallets} p.`;
+      const pDiff = fin.pallets - init.pallets;
+      document.getElementById('m-pal-delta').textContent = `${pDiff >= 0 ? '+' : ''}${pDiff} Pallets`;
+
+      document.getElementById('m-sched-init').textContent = init.schedule || '06:30 - --:--';
+      document.getElementById('m-sched-final').textContent = fin.schedule || '06:59 - --:--';
+
+      // 4. Routes Breakdown Table with Complete Capacities
+      const routesTbody = document.getElementById('routes-tbody');
+      routesTbody.innerHTML = '';
+
+      fin.routes.forEach(r => {
+        const initRoute = init.routes.find(ir => ir.plate === r.plate || ir.id === r.id);
+        const initOrdersCount = initRoute ? initRoute.orderCodes.length : 0;
+        const deltaOrders = r.orderCodes.length - initOrdersCount;
+
+        let note = 'Ruta ajustada por especialista';
+        if (deltaOrders === 0) note = 'Carga y paradas equilibradas';
+        else if (deltaOrders > 0) note = `+${deltaOrders} entregas añadidas`;
+        else note = `${deltaOrders} entregas descargadas`;
+
+        // Occupancy badges style
+        let palBadgeClass = r.pctPal > 95 ? 'pct-high' : (r.pctPal > 70 ? 'pct-ok' : 'pct-norm');
+        let kgBadgeClass = r.pctKg > 90 ? 'pct-high' : (r.pctKg > 50 ? 'pct-ok' : 'pct-norm');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${r.id}</strong></td>
+          <td>${r.driver}</td>
+          <td><span class="veh-chip">${r.plate}</span></td>
+          <td>${r.vehicleType}</td>
+          <td><strong>${r.maxKg} Kg</strong> &bull; ${r.maxPallets} palets</td>
+          <td>
+            <strong>${r.loadPallets} / ${r.maxPallets} p.</strong>
+            <span class="pct ${palBadgeClass}" style="margin-left: 6px;">${r.pctPal}%</span>
+          </td>
+          <td>
+            <strong>${r.loadKg} / ${r.maxKg} Kg</strong>
+            <span class="pct ${kgBadgeClass}" style="margin-left: 6px;">${r.pctKg}%</span>
+          </td>
+          <td>
+            <strong>${r.orderCodes.length}</strong>
+            <span class="delta-badge ${deltaOrders >= 0 ? 'delta-orange' : 'delta-green'}" style="margin-left: 4px;">${deltaOrders >= 0 ? '+' : ''}${deltaOrders}</span>
+          </td>
+          <td>${r.km} Km</td>
+          <td><strong>${r.cost.toFixed(2)} €</strong></td>
+          <td><span class="gm-badge ${r.status === 'Publicada' ? 'badge-mantenido' : 'badge-reasignado'}">${r.status}</span> ${note}</td>
+        `;
+        routesTbody.appendChild(tr);
+      });
+
+      // Filter Counts
+      document.getElementById('count-all').textContent = comp.ordersComparison.length;
+      document.getElementById('count-mantenido').textContent = comp.mantenidosCount;
+      document.getElementById('count-reasignado').textContent = comp.reasignadosCount;
+      document.getElementById('count-nuevo').textContent = comp.nuevosAsignadosCount;
+      document.getElementById('count-sinasignar').textContent = comp.sinAsignarCount;
+
+      renderOrdersTable(comp.ordersComparison);
+
+      resultsArea.style.display = 'block';
+      initialState.style.display = 'none';
+      btnPrint.style.display = 'inline-flex';
+    }
+
+    // Render Orders Table with Distinct Palets and Bultos Columns and Rich Vehicle Headers
+    function renderOrdersTable(orders) {
+      const tbody = document.getElementById('orders-tbody');
+      tbody.innerHTML = '';
+
+      const query = (document.getElementById('order-search').value || '').toLowerCase().trim();
+
+      const filtered = orders.filter(o => {
+        if (currentFilter !== 'all' && o.movementType !== currentFilter) return false;
+        if (query) {
+          const matchAlb = (o.albaran || '').toLowerCase().includes(query);
+          const matchExp = (o.expedicion || '').toLowerCase().includes(query);
+          const matchClient = (o.client || '').toLowerCase().includes(query);
+          const matchVeh = (o.vehicleFinal || '').toLowerCase().includes(query);
+          const matchRoute = (o.routeFinal || '').toLowerCase().includes(query);
+          if (!matchAlb && !matchExp && !matchClient && !matchVeh && !matchRoute) return false;
+        }
+        return true;
+      });
+
+      // Group orders by vehicle so each vehicle has a single consolidated banner
+      filtered.sort((a, b) => {
+        if (a.vehicleFinal === 'Sin Vehículo' && b.vehicleFinal !== 'Sin Vehículo') return 1;
+        if (b.vehicleFinal === 'Sin Vehículo' && a.vehicleFinal !== 'Sin Vehículo') return -1;
+        if (a.vehicleFinal !== b.vehicleFinal) return a.vehicleFinal.localeCompare(b.vehicleFinal);
+        return a.code.localeCompare(b.code);
+      });
+
+      let currentVeh = null;
+
+      filtered.forEach(o => {
+        // Vehicle header bar with capacities and loads
+        if (o.vehicleFinal !== currentVeh) {
+          currentVeh = o.vehicleFinal;
+          const groupTr = document.createElement('tr');
+          groupTr.className = 'group-row';
+
+          let palBadgeClass = (o.pctPal || 0) > 95 ? 'pct-high' : ((o.pctPal || 0) > 70 ? 'pct-ok' : 'pct-norm');
+          let kgBadgeClass = (o.pctKg || 0) > 90 ? 'pct-high' : ((o.pctKg || 0) > 50 ? 'pct-ok' : 'pct-norm');
+
+          groupTr.innerHTML = `
+            <td colspan="10" class="group-cell">
+              <div class="veh-banner-content">
+                <div class="veh-main-info">
+                  🚚 Vehículo: <strong>${currentVeh}</strong> &bull; ${o.driver || 'Conductor asignado'} &bull; <span class="tag-badge">${o.vehicleType}</span>
+                </div>
+                <div class="veh-capacity-badges">
+                  ${currentVeh !== 'Sin Vehículo' ? `
+                    <div class="cap-badge">
+                      📦 Palets: <strong>${o.loadPallets || '-'} / ${o.maxPallets || '-'} p.</strong>
+                      <span class="pct ${palBadgeClass}">${o.pctPal || 0}%</span>
+                    </div>
+                    <div class="cap-badge">
+                      ⚖️ Peso: <strong>${o.loadKg || '-'} / ${o.maxKg || '-'} Kg</strong>
+                      <span class="pct ${kgBadgeClass}">${o.pctKg || 0}%</span>
+                    </div>
+                    <div class="cap-badge">
+                      🎯 Capacidad Máx: <strong>${o.maxKg || '-'} Kg &bull; ${o.maxPallets || '-'} Palets</strong>
+                    </div>
+                  ` : `
+                    <div class="cap-badge" style="color: var(--gm-orange);">
+                      ⚠️ Pedidos pendientes de asignar a vehículo
+                    </div>
+                  `}
+                </div>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(groupTr);
+        }
+
+        const tr = document.createElement('tr');
+
+        let badgeClass = 'badge-mantenido';
+        let badgeLabel = 'Mantenido';
+        if (o.movementType === 'reasignado') { badgeClass = 'badge-reasignado'; badgeLabel = 'Reasignado'; }
+        else if (o.movementType === 'nuevo') { badgeClass = 'badge-nuevo'; badgeLabel = 'Nuevo Asignado'; }
+        else if (o.movementType === 'sinasignar') { badgeClass = 'badge-sinasignar'; badgeLabel = 'Sin Asignar'; }
+        else if (o.movementType === 'eliminado') { badgeClass = 'badge-reasignado'; badgeLabel = 'Eliminado'; }
+
+        // Distinct Palets and Bultos tags
+        const paletDisplay = o.palets !== '-' ? `<span class="tag-palet">${o.palets}</span>` : `<span class="tag-palet empty">-</span>`;
+        const bultoDisplay = o.bultos !== '-' ? `<span class="tag-bulto">${o.bultos}</span>` : `<span class="tag-bulto empty">-</span>`;
+
+        tr.innerHTML = `
+          <td><strong class="code-albaran">${o.albaran || o.code}</strong></td>
+          <td><span class="code-expedicion">${o.expedicion || '-'}</span> ${o.isAdr ? '<span class="badge-adr">ADR</span>' : ''}</td>
+          <td>${o.client}</td>
+          <td style="text-align: center;">${paletDisplay}</td>
+          <td style="text-align: center;">${bultoDisplay}</td>
+          <td>${o.routeInit}</td>
+          <td><strong>${o.routeFinal}</strong></td>
+          <td><span class="veh-chip">${o.vehicleFinal}</span></td>
+          <td>${o.vehicleType}</td>
+          <td><span class="gm-badge ${badgeClass}">${badgeLabel}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align: center; padding: 32px; color: var(--text-muted);">
+              No se encontraron pedidos con el criterio seleccionado.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Event listeners
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.getAttribute('data-filter');
+        if (comparisonResult) {
+          renderOrdersTable(comparisonResult.ordersComparison);
+        }
+      });
+    });
+
+    document.getElementById('order-search').addEventListener('input', () => {
+      if (comparisonResult) {
+        renderOrdersTable(comparisonResult.ordersComparison);
+      }
+    });
+
+    const uploadPanel = document.getElementById('upload-panel');
+    const btnToggleUpload = document.getElementById('btn-toggle-upload');
+
+    btnCompare.addEventListener('click', () => {
+      if (!fileInitialContent || !fileFinalContent) return;
+      parsedInitial = parseHedyla(fileInitialContent, initialFileName);
+      parsedFinal = parseHedyla(fileFinalContent, finalFileName);
+      comparisonResult = comparePlans(parsedInitial, parsedFinal);
+      renderComparison(parsedInitial, parsedFinal, comparisonResult);
+
+      // Hide upload section after execution for cleaner view
+      uploadPanel.style.display = 'none';
+      if (btnToggleUpload) btnToggleUpload.style.display = 'inline-flex';
+
+      resultsArea.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    if (btnToggleUpload) {
+      btnToggleUpload.addEventListener('click', () => {
+        if (uploadPanel.style.display === 'none') {
+          uploadPanel.style.display = 'block';
+          btnToggleUpload.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+            <span>Ocultar Carga de Archivos</span>
+          `;
+          uploadPanel.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          uploadPanel.style.display = 'none';
+          btnToggleUpload.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Cargar Nuevos Archivos</span>
+          `;
+        }
+      });
+    }
+
+    // Demo Case
+    // Demo listener removed
+  </script>
+</body>
+</html>

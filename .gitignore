@@ -1,0 +1,16 @@
+# Hedyla exported dumps and vendor files (contain embedded mapbox keys)
+Hedyla*.html
+Hedyla*_files/
+gemini-code*.html
+*.skill
+
+# OS metadata
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
