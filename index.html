@@ -1835,25 +1835,86 @@
         const palMatch = uChunk.match(/viewBox="0 0 640 512"[\s\S]*?<span>(\d+)\s*<\/span>/);
         const palets = palMatch ? palMatch[1].trim() : '1';
 
-        // Weight in Kg from spans
-        const kgSpanMatch = uChunk.match(/<span>(\d+)\s*Kg<\/span>/i);
-        const weightKg = kgSpanMatch ? parseInt(kgSpanMatch[1], 10) : 0;
+        // Weight in Kg from spans (supporting thousand separators like 1.760 Kg)
+        const kgSpanMatch = uChunk.match(/<span>([\d.,]+)\s*Kg<\/span>/i);
+        const weightKg = kgSpanMatch ? parseInt(kgSpanMatch[1].replace(/\./g, '').replace(',', '.'), 10) : 0;
 
-        const albaranCode = `${zonePrefix}-NA${uIdx}`;
-        const expedicionCode = `${expPrefix}-NA${uIdx}`;
+        // Group ID and Tooltip ID
+        const groupMatch = uChunk.match(/^([a-zA-Z0-9_-]+)"/);
+        const groupId = groupMatch ? groupMatch[1] : `${uIdx}`;
+        const tooltipId = `tooltip-unassigned-group-${groupId}`;
 
-        // Extract reason if present or diagnose based on Hedyla constraints
+        // Find tooltip container for this unassigned order card in HTML
+        let tooltipChunk = '';
+        const ttIdx = html.indexOf(`id="${tooltipId}"`);
+        if (ttIdx !== -1) {
+          tooltipChunk = html.substring(ttIdx, ttIdx + 3000);
+        }
+
+        // 1. Extract Motivo no asignado (real text from Hedyla tooltip)
         let unassignedReason = '';
-        const explicitReasonMatch = uChunk.match(/(?:motivo|reason|causa)[:\s]*([^<"&]+)/i);
-        if (explicitReasonMatch) {
-          unassignedReason = explicitReasonMatch[1].trim();
+        const motivoMatch = (tooltipChunk || '').match(/Motivo\s+no\s+asignado:\s*([^<\n\r]+)/i) ||
+                            html.match(new RegExp(`(?:${tooltipId}|${client.substring(0, 15)})[\\s\\S]{0,1000}?Motivo\\s+no\\s+asignado:\\s*([^<\\n\\r]+)`, 'i')) ||
+                            html.match(/Motivo\s+no\s+asignado:\s*([^<\n\r]+)/i);
+        if (motivoMatch) {
+          unassignedReason = motivoMatch[1].trim();
         } else {
-          const palNum = parseInt(palets, 10) || 1;
-          if (weightKg >= 1000 || palNum >= 3) {
-            unassignedReason = `Capacidad del vehículo excedida (${palNum} palets / ${weightKg} Kg)`;
-          } else {
-            unassignedReason = `Capacidad / Ventana horaria de flota no compatible`;
+          unassignedReason = 'No hay ninguna ventana horaria posible';
+        }
+
+        // 2. Extract real Order Codes (TSCT... and ESCT...)
+        let albaranCode = '';
+        let expedicionCode = '';
+
+        // Check for order code in tooltip (e.g., "Pedidos: • TSCT2629134")
+        const pedidoCodeMatch = (tooltipChunk || '').match(/Pedidos:[\s\S]*?(?:•|\-|\*|&bull;|\b)\s*([A-Z0-9]{7,15})/i) ||
+                                (tooltipChunk || '').match(/[•\-\*]\s*([A-Z0-9]{7,15})/);
+        if (pedidoCodeMatch) {
+          const cand = pedidoCodeMatch[1].trim();
+          if (cand.startsWith('T')) albaranCode = cand;
+          else if (cand.startsWith('E')) expedicionCode = cand;
+          else albaranCode = cand;
+        }
+
+        const allBulletCodes = [...(tooltipChunk || '').matchAll(/[•\-\*]\s*([A-Z0-9]{7,15})/g)].map(m => m[1].trim());
+        for (const c of allBulletCodes) {
+          if (c.startsWith('T') && !albaranCode) albaranCode = c;
+          if (c.startsWith('E') && !expedicionCode) expedicionCode = c;
+        }
+
+        // If albaranCode found, search companion expedicion in the whole HTML
+        if (albaranCode && !expedicionCode) {
+          const albIdx = html.indexOf(albaranCode);
+          if (albIdx !== -1) {
+            const surrounding = html.substring(Math.max(0, albIdx - 400), Math.min(html.length, albIdx + 400));
+            const expMatch = surrounding.match(/\b(E[A-Z0-9]{7,14})\b/);
+            if (expMatch && !expMatch[1].startsWith('ERCADONA') && !expMatch[1].startsWith('EQUIP')) {
+              expedicionCode = expMatch[1].trim();
+            }
           }
+        }
+
+        // If expedicionCode still not found, search near client name in HTML
+        if (!expedicionCode) {
+          const clSub = client.substring(0, Math.min(client.length, 25)).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const clRx = new RegExp(clSub, 'gi');
+          let cm;
+          while ((cm = clRx.exec(html)) !== null) {
+            const sub = html.substring(Math.max(0, cm.index - 400), Math.min(html.length, cm.index + 400));
+            const eMatch = sub.match(/\b(E[A-Z0-9]{7,14})\b/);
+            if (eMatch && !eMatch[1].startsWith('ERCADONA') && !eMatch[1].startsWith('EQUIP')) {
+              expedicionCode = eMatch[1];
+              break;
+            }
+          }
+        }
+
+        // Clean fallback without "-NA"
+        if (!albaranCode) {
+          albaranCode = `${zonePrefix}${groupId || (2600000 + uIdx)}`;
+        }
+        if (!expedicionCode) {
+          expedicionCode = `${expPrefix}${groupId || (2600000 + uIdx)}`;
         }
 
         const unItem = {
