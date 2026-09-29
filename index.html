@@ -1803,38 +1803,58 @@
         data.routes.push(routeObj);
       }
 
-      // 6. Unassigned Orders
-      const unassignedIdx = cleanText.indexOf('No asignados');
-      if (unassignedIdx !== -1) {
-        const unChunk = cleanText.substring(unassignedIdx, unassignedIdx + 6000);
-        const unRx = /data-tooltip-content="([^"]+)"[\s\S]*?<span>(\d+)\s*<\/span>[\s\S]*?<span>(\d+)\s*<\/span>[\s\S]*?<span>(\d+)\s*Kg<\/span>/g;
-        let um;
-        let uIndex = 0;
-        while ((um = unRx.exec(unChunk)) !== null) {
-          uIndex++;
-          const unItem = {
-            code: `UNASG-${uIndex}`,
-            client: um[1].trim(),
-            palets: um[3].trim(),
-            bultos: um[2].trim(),
-            weightKg: parseInt(um[4], 10),
-            routeId: 'Sin Asignar',
-            driver: 'Sin Vehículo',
-            plate: 'Sin Vehículo',
-            vehicleType: 'Sin Vehículo',
-            loadKg: '0',
-            maxKg: '0',
-            pctKg: 0,
-            loadPallets: '0',
-            maxPallets: '0',
-            pctPal: 0,
-            isAdr: false,
-            isUnassigned: true
-          };
-          data.unassignedOrders.push(unItem);
-          data.ordersMap.set(unItem.code, unItem);
-        }
+      // 7. Unassigned Orders (Pedidos No Asignados de Hedyla)
+      const unasgCards = html.split('data-tooltip-id="tooltip-unassigned-group-');
+      const isTenerife = (data.title || '').includes('Tenerife') || html.includes('TENERIFE');
+      const zonePrefix = isTenerife ? 'TSCT' : 'TPMI';
+      const expPrefix = isTenerife ? 'ESCT' : 'EPMI';
+
+      for (let uIdx = 1; uIdx < unasgCards.length; uIdx++) {
+        const uChunk = unasgCards[uIdx];
+
+        // Full client name from tooltip
+        const clientMatch = uChunk.match(/data-tooltip-content="([^"]+)"/);
+        const client = clientMatch ? clientMatch[1].trim() : `Cliente Sin Asignar ${uIdx}`;
+
+        // Pallets count next to 640 512
+        const palMatch = uChunk.match(/viewBox="0 0 640 512"[\s\S]*?<span>(\d+)\s*<\/span>/);
+        const palets = palMatch ? palMatch[1].trim() : '1';
+
+        // Weight in Kg from spans
+        const kgSpanMatch = uChunk.match(/<span>(\d+)\s*Kg<\/span>/i);
+        const weightKg = kgSpanMatch ? parseInt(kgSpanMatch[1], 10) : 0;
+
+        const albaranCode = `${zonePrefix}-NA${uIdx}`;
+        const expedicionCode = `${expPrefix}-NA${uIdx}`;
+
+        const unItem = {
+          code: albaranCode,
+          albaran: albaranCode,
+          expedicion: expedicionCode,
+          client,
+          palets,
+          bultos: '-',
+          weightKg,
+          routeId: 'Sin Asignar',
+          driver: 'Sin Vehículo',
+          plate: 'Sin Vehículo',
+          vehicleType: 'Sin Vehículo',
+          loadKg: '0',
+          maxKg: '0',
+          pctKg: 0,
+          loadPallets: '0',
+          maxPallets: '0',
+          pctPal: 0,
+          isAdr: false,
+          isUnassigned: true
+        };
+
+        data.unassignedOrders.push(unItem);
+        data.ordersMap.set(unItem.code, unItem);
       }
+
+      data.plannedOrders = data.totalOrders;
+      data.totalOrders = data.plannedOrders + data.unassignedOrders.length;
 
       return data;
     }
@@ -1847,8 +1867,20 @@
       let nuevosAsignadosCount = 0;
       let sinAsignarCount = 0;
 
+      // Index unassigned orders from initial plan by normalized client name
+      const initUnassignedByClient = new Map();
+      init.unassignedOrders.forEach(u => {
+        initUnassignedByClient.set(u.client.toLowerCase().trim(), u);
+      });
+
       fin.ordersMap.forEach((finOrder, code) => {
-        const initOrder = init.ordersMap.get(code);
+        let initOrder = init.ordersMap.get(code);
+
+        // If not matched by code, check if it was an unassigned order rescued for this client
+        if (!initOrder && initUnassignedByClient.has(finOrder.client.toLowerCase().trim())) {
+          initOrder = initUnassignedByClient.get(finOrder.client.toLowerCase().trim());
+          initUnassignedByClient.delete(finOrder.client.toLowerCase().trim());
+        }
 
         let movementType = 'mantenido';
         let note = '';
@@ -1896,31 +1928,63 @@
         });
       });
 
+      // Process orders from init that are not in fin
       init.ordersMap.forEach((initOrder, code) => {
-        if (!fin.ordersMap.has(code) && !initOrder.isUnassigned) {
-          const initCodes = resolveCodes(initOrder);
-          ordersComparison.push({
-            code: initOrder.code,
-            albaran: initCodes.albaran,
-            expedicion: initCodes.expedicion,
-            client: initOrder.client,
-            palets: initOrder.palets,
-            bultos: initOrder.bultos,
-            routeInit: initOrder.routeId,
-            routeFinal: 'Eliminado',
-            vehicleFinal: 'Sin Vehículo',
-            vehicleType: 'Sin Vehículo',
-            driver: 'Sin Conductor',
-            loadKg: '0',
-            maxKg: '0',
-            pctKg: 0,
-            loadPallets: '0',
-            maxPallets: '0',
-            pctPal: 0,
-            isAdr: initOrder.isAdr,
-            movementType: 'eliminado',
-            note: 'Descartado del plan por el especialista'
-          });
+        if (!fin.ordersMap.has(code)) {
+          if (initOrder.isUnassigned) {
+            // Check if it was matched to a rescued order by client
+            const wasRescued = ordersComparison.some(o => o.client.toLowerCase().trim() === initOrder.client.toLowerCase().trim() && o.movementType === 'nuevo');
+            if (!wasRescued) {
+              sinAsignarCount++;
+              const initCodes = resolveCodes(initOrder);
+              ordersComparison.push({
+                code: initOrder.code,
+                albaran: initCodes.albaran,
+                expedicion: initCodes.expedicion,
+                client: initOrder.client,
+                palets: initOrder.palets,
+                bultos: initOrder.bultos,
+                routeInit: 'Sin Asignar',
+                routeFinal: 'Sin Asignar',
+                vehicleFinal: 'Sin Vehículo',
+                vehicleType: 'Sin Vehículo',
+                driver: 'Sin Conductor',
+                loadKg: '0',
+                maxKg: '0',
+                pctKg: 0,
+                loadPallets: '0',
+                maxPallets: '0',
+                pctPal: 0,
+                isAdr: initOrder.isAdr,
+                movementType: 'sinasignar',
+                note: 'No asignado a ruta (pendiente de vehículo)'
+              });
+            }
+          } else {
+            const initCodes = resolveCodes(initOrder);
+            ordersComparison.push({
+              code: initOrder.code,
+              albaran: initCodes.albaran,
+              expedicion: initCodes.expedicion,
+              client: initOrder.client,
+              palets: initOrder.palets,
+              bultos: initOrder.bultos,
+              routeInit: initOrder.routeId,
+              routeFinal: 'Eliminado',
+              vehicleFinal: 'Sin Vehículo',
+              vehicleType: 'Sin Vehículo',
+              driver: 'Sin Conductor',
+              loadKg: '0',
+              maxKg: '0',
+              pctKg: 0,
+              loadPallets: '0',
+              maxPallets: '0',
+              pctPal: 0,
+              isAdr: initOrder.isAdr,
+              movementType: 'eliminado',
+              note: 'Descartado del plan por el especialista'
+            });
+          }
         }
       });
 
