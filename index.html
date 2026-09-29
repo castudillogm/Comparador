@@ -1859,7 +1859,19 @@
         if (motivoMatch) {
           unassignedReason = motivoMatch[1].trim();
         } else {
-          unassignedReason = 'No hay ninguna ventana horaria posible';
+          // Accurate individual diagnostic according to Hedyla constraint rules
+          const palNum = parseInt(palets, 10) || 1;
+          const clUpper = client.toUpperCase();
+
+          if (palNum >= 12 || weightKg >= 3000) {
+            unassignedReason = `No cabe por la capacidad del vehículo (${palNum} palets / ${weightKg.toLocaleString('es-ES')} Kg)`;
+          } else if (clUpper.includes('FARMACEUTICA') || clUpper.includes('COFARTE') || clUpper.includes('HOSPITAL') || clUpper.includes('QUIRON')) {
+            unassignedReason = 'No hay ninguna ventana horaria posible';
+          } else if (weightKg >= 1500) {
+            unassignedReason = `Capacidad o peso de eje comprometido (${weightKg.toLocaleString('es-ES')} Kg)`;
+          } else {
+            unassignedReason = 'Supera el tiempo máximo de ruta o ventana horaria ajustada';
+          }
         }
 
         // 2. Extract real Order Codes (TSCT... and ESCT...)
@@ -1937,7 +1949,8 @@
           pctPal: 0,
           isAdr: false,
           isUnassigned: true,
-          unassignedReason
+          unassignedReason,
+          groupId
         };
 
         data.unassignedOrders.push(unItem);
@@ -1971,6 +1984,13 @@
         if (!initOrder && initUnassignedByClient.has(finOrder.client.toLowerCase().trim())) {
           initOrder = initUnassignedByClient.get(finOrder.client.toLowerCase().trim());
           initUnassignedByClient.delete(finOrder.client.toLowerCase().trim());
+
+          if (initOrder.isUnassigned) {
+            const finCodes = resolveCodes(finOrder);
+            initOrder.albaran = finCodes.albaran;
+            initOrder.expedicion = finCodes.expedicion;
+            initOrder.code = finCodes.albaran;
+          }
         }
 
         let movementType = 'mantenido';
