@@ -1851,27 +1851,13 @@
           tooltipChunk = html.substring(ttIdx, ttIdx + 3000);
         }
 
-        // 1. Extract Motivo no asignado (real text from Hedyla tooltip)
+        // 1. Extract Motivo no asignado (only if explicitly present in HTML/tooltip)
         let unassignedReason = '';
         const motivoMatch = (tooltipChunk || '').match(/Motivo\s+no\s+asignado:\s*([^<\n\r]+)/i) ||
                             html.match(new RegExp(`(?:${tooltipId}|${client.substring(0, 15)})[\\s\\S]{0,1000}?Motivo\\s+no\\s+asignado:\\s*([^<\\n\\r]+)`, 'i')) ||
                             html.match(/Motivo\s+no\s+asignado:\s*([^<\n\r]+)/i);
         if (motivoMatch) {
           unassignedReason = motivoMatch[1].trim();
-        } else {
-          // Accurate individual diagnostic according to Hedyla constraint rules
-          const palNum = parseInt(palets, 10) || 1;
-          const clUpper = client.toUpperCase();
-
-          if (palNum >= 12 || weightKg >= 3000) {
-            unassignedReason = `No cabe por la capacidad del vehículo (${palNum} palets / ${weightKg.toLocaleString('es-ES')} Kg)`;
-          } else if (clUpper.includes('FARMACEUTICA') || clUpper.includes('COFARTE') || clUpper.includes('HOSPITAL') || clUpper.includes('QUIRON')) {
-            unassignedReason = 'No hay ninguna ventana horaria posible';
-          } else if (weightKg >= 1500) {
-            unassignedReason = `Capacidad o peso de eje comprometido (${weightKg.toLocaleString('es-ES')} Kg)`;
-          } else {
-            unassignedReason = 'Supera el tiempo máximo de ruta o ventana horaria ajustada';
-          }
         }
 
         // 2. Extract real Order Codes (TSCT... and ESCT...)
@@ -1999,7 +1985,7 @@
         if (finOrder.isUnassigned) {
           movementType = 'sinasignar';
           sinAsignarCount++;
-          note = finOrder.unassignedReason ? `⚠️ ${finOrder.unassignedReason}` : 'Permanece sin asignar en plan final';
+          note = finOrder.unassignedReason ? `⚠️ ${finOrder.unassignedReason}` : '';
         } else if (!initOrder || initOrder.isUnassigned) {
           movementType = 'nuevo';
           nuevosAsignadosCount++;
@@ -2070,7 +2056,7 @@
                 pctPal: 0,
                 isAdr: initOrder.isAdr,
                 movementType: 'sinasignar',
-                note: `⚠️ ${initOrder.unassignedReason || 'No asignado por motor de optimización'}`
+                note: initOrder.unassignedReason ? `⚠️ ${initOrder.unassignedReason}` : ''
               });
             }
           } else {
