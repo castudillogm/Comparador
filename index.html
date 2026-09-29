@@ -936,6 +936,21 @@
       margin-left: 6px;
     }
 
+    .order-note-sub {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 3px;
+      line-height: 1.25;
+      max-width: 220px;
+      white-space: normal;
+    }
+
+    .order-note-sub.note-orange {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
     .veh-chip {
       font-weight: 700;
       color: var(--gm-blue-dark);
@@ -1827,6 +1842,20 @@
         const albaranCode = `${zonePrefix}-NA${uIdx}`;
         const expedicionCode = `${expPrefix}-NA${uIdx}`;
 
+        // Extract reason if present or diagnose based on Hedyla constraints
+        let unassignedReason = '';
+        const explicitReasonMatch = uChunk.match(/(?:motivo|reason|causa)[:\s]*([^<"&]+)/i);
+        if (explicitReasonMatch) {
+          unassignedReason = explicitReasonMatch[1].trim();
+        } else {
+          const palNum = parseInt(palets, 10) || 1;
+          if (weightKg >= 1000 || palNum >= 3) {
+            unassignedReason = `Capacidad del vehículo excedida (${palNum} palets / ${weightKg} Kg)`;
+          } else {
+            unassignedReason = `Capacidad / Ventana horaria de flota no compatible`;
+          }
+        }
+
         const unItem = {
           code: albaranCode,
           albaran: albaranCode,
@@ -1846,7 +1875,8 @@
           maxPallets: '0',
           pctPal: 0,
           isAdr: false,
-          isUnassigned: true
+          isUnassigned: true,
+          unassignedReason
         };
 
         data.unassignedOrders.push(unItem);
@@ -1888,15 +1918,17 @@
         if (finOrder.isUnassigned) {
           movementType = 'sinasignar';
           sinAsignarCount++;
-          note = 'Permanece sin asignar en plan final';
+          note = finOrder.unassignedReason ? `⚠️ ${finOrder.unassignedReason}` : 'Permanece sin asignar en plan final';
         } else if (!initOrder || initOrder.isUnassigned) {
           movementType = 'nuevo';
           nuevosAsignadosCount++;
-          note = 'Rescatado por especialista y asignado a ruta';
+          note = initOrder && initOrder.isUnassigned
+            ? `Rescatado: Asignado a ${finOrder.plate} (${finOrder.vehicleType})`
+            : 'Nuevo pedido incorporado por especialista';
         } else if (initOrder.routeId === finOrder.routeId || initOrder.plate === finOrder.plate) {
           movementType = 'mantenido';
           mantenidosCount++;
-          note = 'Mantenido en la misma ruta/vehículo inicial';
+          note = 'Mantenido en ruta/vehículo inicial';
         } else {
           movementType = 'reasignado';
           reasignadosCount++;
@@ -1957,7 +1989,7 @@
                 pctPal: 0,
                 isAdr: initOrder.isAdr,
                 movementType: 'sinasignar',
-                note: 'No asignado a ruta (pendiente de vehículo)'
+                note: `⚠️ ${initOrder.unassignedReason || 'No asignado por motor de optimización'}`
               });
             }
           } else {
@@ -2248,7 +2280,10 @@
           <td><strong>${o.routeFinal}</strong></td>
           <td><span class="veh-chip">${o.vehicleFinal}</span></td>
           <td>${o.vehicleType}</td>
-          <td><span class="gm-badge ${badgeClass}">${badgeLabel}</span></td>
+          <td>
+            <span class="gm-badge ${badgeClass}">${badgeLabel}</span>
+            ${o.note ? `<div class="order-note-sub ${o.movementType === 'sinasignar' ? 'note-orange' : ''}">${o.note}</div>` : ''}
+          </td>
         `;
         tbody.appendChild(tr);
       });
