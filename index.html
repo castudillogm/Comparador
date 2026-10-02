@@ -979,6 +979,216 @@
       display: inline-block;
     }
 
+    /* Driver Times Table & KPI Summary Bar */
+    .driver-kpi-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .driver-kpi-card {
+      background: var(--gm-white);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .d-kpi-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .d-kpi-vals {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .d-kpi-init {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .d-kpi-arrow {
+      color: var(--gm-blue-light);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .d-kpi-fin {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+    }
+
+    .d-kpi-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .driver-id-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gm-blue-light);
+      background: var(--gm-blue-light-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    .schedule-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .badge-tachograph-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+
+    .badge-tachograph-warn {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .badge-tachograph-ok {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .badge-tachograph-extended {
+      background: #f3e8ff;
+      color: #7e22ce;
+      border: 1px solid #d8b4fe;
+    }
+
+    .table-totals-row {
+      background: #e2e8f0 !important;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+      border-top: 2px solid var(--gm-blue-dark);
+    }
+
+    .table-totals-row td {
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+
+    /* Duration Limit Configuration Control */
+    .limit-config-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gm-white);
+      border: 1px solid var(--border-color);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      flex-wrap: wrap;
+    }
+
+    .limit-config-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gm-blue-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .limit-config-label svg {
+      color: var(--gm-orange);
+    }
+
+    .limit-config-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .limit-config-input-wrap input {
+      width: 52px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gm-blue-dark);
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      background: #fafafa;
+    }
+
+    .limit-config-input-wrap input:focus {
+      border-color: var(--gm-orange);
+      box-shadow: 0 0 0 3px rgba(247, 86, 0, 0.15);
+      background: #ffffff;
+    }
+
+    .limit-unit {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .limit-presets {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      border-left: 1px solid var(--border-color);
+      padding-left: 6px;
+    }
+
+    .preset-btn {
+      padding: 3px 7px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: #f8fafc;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .preset-btn:hover {
+      background: #e2e8f0;
+      color: var(--gm-blue-dark);
+    }
+
+    .preset-btn.active {
+      background: var(--gm-orange);
+      color: var(--gm-white);
+      border-color: var(--gm-orange);
+    }
+
     .empty-block {
       padding: 60px 20px;
       text-align: center;
@@ -1338,7 +1548,136 @@
         </div>
       </div>
 
-      <!-- 5. 100% Orders Traceability Table (Separate PALETS & BULTOS Columns) -->
+      <!-- 5. Driver Duration and Driving Times Control Table -->
+      <div class="table-container" id="driver-times-container">
+        <div class="table-headbar">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div class="panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#091197" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Control de Tiempos de Conducción y Jornada de Choferes
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">
+              Auditoría de tiempos de conducción efectiva y duración total de servicio por chofer y vehículo (Hedyla vs Especialista)
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Configurable Maximum Duration Limit Control -->
+            <div class="limit-config-box" title="Ajusta el límite máximo de duración de jornada para detectar excesos de tiempo de servicio">
+              <div class="limit-config-label">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Duración Máx:</span>
+              </div>
+              <div class="limit-config-input-wrap">
+                <input type="number" id="input-max-duration" min="1" max="72" step="0.5" value="9" title="Introduce el límite de duración máxima en horas">
+                <span class="limit-unit">horas</span>
+              </div>
+              <div class="limit-presets">
+                <button type="button" class="preset-btn" data-hours="8">8h</button>
+                <button type="button" class="preset-btn active" data-hours="9">9h</button>
+                <button type="button" class="preset-btn" data-hours="10">10h</button>
+                <button type="button" class="preset-btn" data-hours="12">12h</button>
+              </div>
+            </div>
+
+            <div class="search-input-wrap" style="min-width: 210px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="driver-search" placeholder="Buscar chofer, matrícula, ruta...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter tabs for Driver Times -->
+        <div style="padding: 10px 20px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div class="tab-filters" id="driver-filters">
+            <button class="tab-btn driver-tab-btn active" data-driver-filter="all">Todos (<span id="driver-count-all">0</span>)</button>
+            <button class="tab-btn driver-tab-btn" data-driver-filter="exceed_dur" style="border-color: #fca5a5; color: #b91c1c;">
+              ⚠️ Exceso Duración (&gt; <span id="lbl-filter-max-dur">9</span>h) (<span id="driver-count-dur-alert">0</span>)
+            </button>
+            <button class="tab-btn driver-tab-btn" data-driver-filter="warn">&gt; 4.5h Conducción (<span id="driver-count-warn">0</span>)</button>
+            <button class="tab-btn driver-tab-btn" data-driver-filter="danger">&gt; 9h Conducción (<span id="driver-count-danger">0</span>)</button>
+            <button class="tab-btn driver-tab-btn" data-driver-filter="inc">Mayor Conducción (+) (<span id="driver-count-inc">0</span>)</button>
+            <button class="tab-btn driver-tab-btn" data-driver-filter="dec">Menor Conducción (-) (<span id="driver-count-dec">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Driver Times Mini KPI Summary Bar -->
+        <div class="driver-kpi-bar" id="driver-kpi-bar">
+          <div class="driver-kpi-card">
+            <span class="d-kpi-lbl">Tiempo Total Conducción Flota</span>
+            <div class="d-kpi-vals">
+              <span class="d-kpi-init" id="dkpi-cond-init">--</span>
+              <span class="d-kpi-arrow">&rarr;</span>
+              <span class="d-kpi-fin" id="dkpi-cond-fin">--</span>
+            </div>
+            <span class="delta-badge" id="dkpi-cond-delta">--</span>
+          </div>
+
+          <div class="driver-kpi-card">
+            <span class="d-kpi-lbl">Duración Total Servicios (Jornada)</span>
+            <div class="d-kpi-vals">
+              <span class="d-kpi-init" id="dkpi-dur-init">--</span>
+              <span class="d-kpi-arrow">&rarr;</span>
+              <span class="d-kpi-fin" id="dkpi-dur-fin">--</span>
+            </div>
+            <span class="delta-badge" id="dkpi-dur-delta">--</span>
+          </div>
+
+          <div class="driver-kpi-card">
+            <span class="d-kpi-lbl">Media Conducción / Conductor</span>
+            <div class="d-kpi-vals">
+              <span class="d-kpi-fin" id="dkpi-cond-avg">--</span>
+            </div>
+            <span class="d-kpi-sub" id="dkpi-drivers-active">-- choferes activos</span>
+          </div>
+
+          <div class="driver-kpi-card" id="kpi-card-dur-alert">
+            <span class="d-kpi-lbl">Exceso Duración (&gt; <span id="dkpi-max-dur-val">9h</span>)</span>
+            <div class="d-kpi-vals">
+              <span class="d-kpi-fin" id="dkpi-dur-alert-count">0</span>
+            </div>
+            <span class="d-kpi-sub" id="dkpi-dur-alert-sub">Límite configurable superado</span>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="table-drivers">
+            <thead>
+              <tr>
+                <th>Conductor</th>
+                <th>Vehículo / Matrícula</th>
+                <th>Ruta</th>
+                <th>Horario Planificado</th>
+                <th>Conducción Inicial</th>
+                <th>Conducción Final</th>
+                <th>Dif. Conducción</th>
+                <th>Duración Inicial</th>
+                <th>Duración Final</th>
+                <th>Dif. Duración</th>
+                <th>Operativa en Destino</th>
+                <th>Estado y Tacógrafo</th>
+              </tr>
+            </thead>
+            <tbody id="driver-times-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+            <tfoot id="driver-times-tfoot">
+              <!-- Rendered via JS -->
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- 6. 100% Orders Traceability Table (Separate PALETS & BULTOS Columns) -->
       <div class="table-container">
         <div class="table-headbar">
           <div class="tab-filters" id="order-filters">
@@ -1487,6 +1826,46 @@
       if (fileInitialContent && fileFinalContent) {
         btnCompare.disabled = false;
       }
+    }
+
+    // Helper: Parse Spanish time duration string to total minutes (e.g. "5 horas y 50 minutos", "1 día, 6 horas y 32 minutos", "43 minutos")
+    function parseDurationToMinutes(str) {
+      if (!str || typeof str !== 'string') return 0;
+      let total = 0;
+      const daysMatch = str.match(/(\d+)\s*d[ií]a/i);
+      if (daysMatch) total += parseInt(daysMatch[1], 10) * 24 * 60;
+      const hoursMatch = str.match(/(\d+)\s*hora/i);
+      if (hoursMatch) total += parseInt(hoursMatch[1], 10) * 60;
+      const minsMatch = str.match(/(\d+)\s*minuto/i);
+      if (minsMatch) total += parseInt(minsMatch[1], 10);
+      return total;
+    }
+
+    // Helper: Format minutes into human readable text (e.g. "5h 50m", "1d 6h 32m", "43m")
+    function formatMinutesToHuman(minutes, showSign = false, formatHoursTotal = false) {
+      if (minutes === null || minutes === undefined || isNaN(minutes)) return '-';
+      if (minutes === 0) return '0m';
+      const isNeg = minutes < 0;
+      const m = Math.abs(minutes);
+
+      const sign = isNeg ? '-' : (showSign ? '+' : '');
+
+      if (formatHoursTotal) {
+        const totalHours = Math.floor(m / 60);
+        const remMins = m % 60;
+        return `${sign}${totalHours}h ${remMins}m`;
+      }
+
+      const days = Math.floor(m / (24 * 60));
+      const remHours = Math.floor((m % (24 * 60)) / 60);
+      const remMins = m % 60;
+
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      if (remHours > 0 || (days > 0 && remMins > 0)) parts.push(`${remHours}h`);
+      if (remMins > 0 || parts.length === 0) parts.push(`${remMins}m`);
+
+      return sign + parts.join(' ');
     }
 
     // Helper: Separate Palets and Bultos from string (e.g., "1/1", "0/2", "1/12", "5/5")
@@ -1674,6 +2053,21 @@
         const numMaxPal = parseFloat(maxPallets.replace(/\./g, '').replace(',', '.')) || 1;
         const pctPal = Math.round((numLoadPal / numMaxPal) * 100);
 
+        // Extract duration and driving times
+        const durMatch = routeChunk.match(/data-tooltip-content="Duración"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/i);
+        const condMatch = routeChunk.match(/data-tooltip-content="Tiempo conducción"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/i);
+        const startMatch = routeChunk.match(/data-tooltip-content="Inicio planificado a las ([^"]+)"/i);
+        const endMatch = routeChunk.match(/data-tooltip-content="Final planificado a las ([^"]+)"/i);
+        const waitMatch = routeChunk.match(/data-tooltip-content="Tiempo de espera"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/i);
+
+        const durationStr = durMatch ? durMatch[1].trim() : '';
+        const durationMinutes = parseDurationToMinutes(durationStr);
+        const drivingStr = condMatch ? condMatch[1].trim() : '';
+        const drivingMinutes = parseDurationToMinutes(drivingStr);
+        const startTime = startMatch ? startMatch[1].trim() : '';
+        const endTime = endMatch ? endMatch[1].trim() : '';
+        const waitTime = waitMatch ? waitMatch[1].trim() : '';
+
         const routeObj = {
           id: routeCode,
           driver: rh.driver,
@@ -1689,6 +2083,13 @@
           loadPallets,
           maxPallets,
           pctPal,
+          durationStr,
+          durationMinutes,
+          drivingStr,
+          drivingMinutes,
+          startTime,
+          endTime,
+          waitTime,
           orderCodes: []
         };
 
@@ -1819,6 +2220,8 @@
         data.ordersMap.set(trackingCode, unItem);
       }
 
+      data.totalDrivingMinutes = data.routes.reduce((sum, r) => sum + (r.drivingMinutes || 0), 0);
+      data.totalDurationMinutes = data.routes.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
       data.totalOrders = (data.plannedOrders || (data.ordersMap.size - data.unassignedOrders.length)) + data.unassignedOrders.length;
       return data;
     }
@@ -2009,6 +2412,121 @@
       const efficiencyScore = totalHandled > 0 ? Math.round((mantenidosCount / totalHandled) * 100) : 100;
       const reassignPercent = totalHandled > 0 ? ((reasignadosCount / totalHandled) * 100).toFixed(1) : 0;
 
+      // 4. Driver & Route Times Comparative Analysis
+      const driversComparison = [];
+      const usedInitRoutes = new Set();
+
+      fin.routes.forEach(fr => {
+        // Priority 1: Same driver & same plate
+        let match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.driver === fr.driver && ir.plate === fr.plate);
+        // Priority 2: Same plate (vehicle)
+        if (!match) {
+          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.plate === fr.plate);
+        }
+        // Priority 3: Same driver
+        if (!match) {
+          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.driver === fr.driver);
+        }
+        // Priority 4: Same route code
+        if (!match) {
+          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.id === fr.id);
+        }
+
+        if (match) usedInitRoutes.add(match);
+
+        const condInitMin = match ? match.drivingMinutes : null;
+        const condFinMin = fr.drivingMinutes;
+        const condDiffMin = match ? (condFinMin - condInitMin) : 0;
+
+        const durInitMin = match ? match.durationMinutes : null;
+        const durFinMin = fr.durationMinutes;
+        const durDiffMin = match ? (durFinMin - durInitMin) : 0;
+
+        const nonDrivingMin = Math.max(0, durFinMin - condFinMin);
+        const ratioDriving = durFinMin > 0 ? Math.round((condFinMin / durFinMin) * 100) : 0;
+
+        let statusAlert = 'ok'; // ok, warn (>4.5h), danger (>9h)
+        if (condFinMin > 540) {
+          statusAlert = 'danger'; // > 9 hours
+        } else if (condFinMin > 270) {
+          statusAlert = 'warn'; // > 4.5 hours
+        }
+
+        const isExtendedShift = durFinMin >= 1440; // >= 24h
+
+        driversComparison.push({
+          driver: fr.driver,
+          driverId: fr.driverId,
+          driverInit: match ? match.driver : null,
+          driverChanged: match && match.driver !== fr.driver,
+          plate: fr.plate,
+          vehicleType: fr.vehicleType,
+          routeId: fr.id,
+          startTime: fr.startTime,
+          endTime: fr.endTime,
+          condInitStr: match ? (match.drivingStr || formatMinutesToHuman(condInitMin)) : '-',
+          condInitMin,
+          condFinStr: fr.drivingStr || formatMinutesToHuman(condFinMin),
+          condFinMin,
+          condDiffMin,
+          durInitStr: match ? (match.durationStr || formatMinutesToHuman(durInitMin)) : '-',
+          durInitMin,
+          durFinStr: fr.durationStr || formatMinutesToHuman(durFinMin),
+          durFinMin,
+          durDiffMin,
+          nonDrivingMin,
+          ratioDriving,
+          statusAlert,
+          isExtendedShift,
+          isCancelled: false
+        });
+      });
+
+      // Include any initial routes cancelled or omitted by the specialist
+      init.routes.forEach(ir => {
+        if (!usedInitRoutes.has(ir)) {
+          driversComparison.push({
+            driver: ir.driver,
+            driverId: ir.driverId,
+            driverInit: ir.driver,
+            driverChanged: false,
+            plate: ir.plate,
+            vehicleType: ir.vehicleType,
+            routeId: ir.id,
+            startTime: ir.startTime,
+            endTime: ir.endTime,
+            condInitStr: ir.drivingStr || formatMinutesToHuman(ir.drivingMinutes),
+            condInitMin: ir.drivingMinutes,
+            condFinStr: 'Cancelada',
+            condFinMin: 0,
+            condDiffMin: -ir.drivingMinutes,
+            durInitStr: ir.durationStr || formatMinutesToHuman(ir.durationMinutes),
+            durInitMin: ir.durationMinutes,
+            durFinStr: '-',
+            durFinMin: 0,
+            durDiffMin: -ir.durationMinutes,
+            nonDrivingMin: 0,
+            ratioDriving: 0,
+            statusAlert: 'cancelled',
+            isExtendedShift: false,
+            isCancelled: true
+          });
+        }
+      });
+
+      const totalDrivingInit = init.totalDrivingMinutes || 0;
+      const totalDrivingFin = fin.totalDrivingMinutes || 0;
+      const totalDrivingDiff = totalDrivingFin - totalDrivingInit;
+
+      const totalDurInit = init.totalDurationMinutes || 0;
+      const totalDurFin = fin.totalDurationMinutes || 0;
+      const totalDurDiff = totalDurFin - totalDurInit;
+
+      const totalNonDrivingFin = Math.max(0, totalDurFin - totalDrivingFin);
+      const avgDrivingFin = fin.routes.length > 0 ? Math.round(totalDrivingFin / fin.routes.length) : 0;
+      const countTachographAlerts = fin.routes.filter(r => (r.drivingMinutes || 0) > 270).length;
+      const activeDriversCount = new Set(fin.routes.map(r => r.driver)).size;
+
       return {
         efficiencyScore,
         reassignPercent,
@@ -2019,6 +2537,19 @@
         desasignadosCount,
         eliminadosCount,
         ordersComparison,
+        driversComparison,
+        driverMetrics: {
+          totalDrivingInit,
+          totalDrivingFin,
+          totalDrivingDiff,
+          totalDurInit,
+          totalDurFin,
+          totalDurDiff,
+          totalNonDrivingFin,
+          avgDrivingFin,
+          activeDriversCount,
+          countTachographAlerts
+        },
         costDiff: fin.cost - init.cost,
         kmDiff: fin.distanceKm - init.distanceKm,
         routesDiff: fin.totalRoutes - init.totalRoutes,
@@ -2180,11 +2711,276 @@
         }
       }
 
+      renderDriverTimesTable(comp.driversComparison, comp.driverMetrics);
       renderOrdersTable(comp.ordersComparison);
 
       resultsArea.style.display = 'block';
       initialState.style.display = 'none';
       btnPrint.style.display = 'inline-flex';
+    }
+
+    let currentDriverFilter = 'all';
+
+    // Render Driver Times Table with Complete Durations, Driving Times, and Tachograph Regulations
+    function renderDriverTimesTable(drivers, metrics) {
+      const tbody = document.getElementById('driver-times-tbody');
+      const tfoot = document.getElementById('driver-times-tfoot');
+      if (!tbody || !drivers) return;
+
+      tbody.innerHTML = '';
+      if (tfoot) tfoot.innerHTML = '';
+
+      // Update Mini KPI bar
+      if (metrics) {
+        const condInitEl = document.getElementById('dkpi-cond-init');
+        const condFinEl = document.getElementById('dkpi-cond-fin');
+        const condDeltaEl = document.getElementById('dkpi-cond-delta');
+        if (condInitEl && condFinEl && condDeltaEl) {
+          condInitEl.textContent = formatMinutesToHuman(metrics.totalDrivingInit, false, true);
+          condFinEl.textContent = formatMinutesToHuman(metrics.totalDrivingFin, false, true);
+          const cDiff = metrics.totalDrivingDiff;
+          condDeltaEl.textContent = `${cDiff >= 0 ? '+' : ''}${formatMinutesToHuman(cDiff, false, true)}`;
+          condDeltaEl.className = `delta-badge ${cDiff <= 0 ? 'delta-green' : 'delta-orange'}`;
+        }
+
+        const durInitEl = document.getElementById('dkpi-dur-init');
+        const durFinEl = document.getElementById('dkpi-dur-fin');
+        const durDeltaEl = document.getElementById('dkpi-dur-delta');
+        if (durInitEl && durFinEl && durDeltaEl) {
+          durInitEl.textContent = formatMinutesToHuman(metrics.totalDurInit, false, true);
+          durFinEl.textContent = formatMinutesToHuman(metrics.totalDurFin, false, true);
+          const dDiff = metrics.totalDurDiff;
+          durDeltaEl.textContent = `${dDiff >= 0 ? '+' : ''}${formatMinutesToHuman(dDiff, false, true)}`;
+          durDeltaEl.className = `delta-badge ${dDiff <= 0 ? 'delta-green' : 'delta-blue'}`;
+        }
+
+        const avgEl = document.getElementById('dkpi-cond-avg');
+        const activeEl = document.getElementById('dkpi-drivers-active');
+        if (avgEl) avgEl.textContent = formatMinutesToHuman(metrics.avgDrivingFin, false, true);
+        if (activeEl) activeEl.textContent = `${metrics.activeDriversCount} conductores activos`;
+
+        const tachoCountEl = document.getElementById('dkpi-tachograph-count');
+        const tachoSubEl = document.getElementById('dkpi-tachograph-sub');
+        if (tachoCountEl) {
+          tachoCountEl.textContent = metrics.countTachographAlerts;
+          tachoCountEl.style.color = metrics.countTachographAlerts > 0 ? 'var(--gm-orange)' : 'var(--gm-blue-dark)';
+        }
+        if (tachoSubEl) {
+          tachoSubEl.textContent = metrics.countTachographAlerts > 0
+            ? `${metrics.countTachographAlerts} rutas requieren pausa reglamentaria`
+            : 'Todas las rutas dentro de límites estándar';
+        }
+      }
+
+      // Get configurable maximum duration limit in hours
+      const maxDurInput = document.getElementById('input-max-duration');
+      let maxDurationHoursConfig = maxDurInput ? parseFloat(maxDurInput.value) : 9;
+      if (isNaN(maxDurationHoursConfig) || maxDurationHoursConfig <= 0) maxDurationHoursConfig = 9;
+      const maxDurationMinutes = maxDurationHoursConfig * 60;
+
+      // Update duration limit labels in KPI bar and filter tabs
+      const elFilterMaxDur = document.getElementById('lbl-filter-max-dur');
+      if (elFilterMaxDur) elFilterMaxDur.textContent = maxDurationHoursConfig;
+
+      const dkpiMaxDurVal = document.getElementById('dkpi-max-dur-val');
+      if (dkpiMaxDurVal) dkpiMaxDurVal.textContent = `${maxDurationHoursConfig}h`;
+
+      // Count routes exceeding the configurable duration limit
+      const countExceedDur = drivers.filter(d => !d.isCancelled && d.durFinMin > maxDurationMinutes).length;
+
+      const dkpiDurAlertCount = document.getElementById('dkpi-dur-alert-count');
+      const dkpiDurAlertSub = document.getElementById('dkpi-dur-alert-sub');
+      if (dkpiDurAlertCount) {
+        dkpiDurAlertCount.textContent = countExceedDur;
+        dkpiDurAlertCount.style.color = countExceedDur > 0 ? '#cf1322' : 'var(--gm-blue-dark)';
+      }
+      if (dkpiDurAlertSub) {
+        dkpiDurAlertSub.textContent = countExceedDur > 0
+          ? `${countExceedDur} ruta(s) exceden el límite de ${maxDurationHoursConfig}h`
+          : `Todas dentro del límite de ${maxDurationHoursConfig}h`;
+      }
+
+      // Filter counts
+      const countAll = drivers.length;
+      const countWarn = drivers.filter(d => !d.isCancelled && d.condFinMin > 270 && d.condFinMin <= 540).length;
+      const countDanger = drivers.filter(d => !d.isCancelled && d.condFinMin > 540).length;
+      const countInc = drivers.filter(d => !d.isCancelled && d.condDiffMin > 0).length;
+      const countDec = drivers.filter(d => !d.isCancelled && d.condDiffMin < 0).length;
+
+      const elAll = document.getElementById('driver-count-all');
+      const elDurAlert = document.getElementById('driver-count-dur-alert');
+      const elWarn = document.getElementById('driver-count-warn');
+      const elDanger = document.getElementById('driver-count-danger');
+      const elInc = document.getElementById('driver-count-inc');
+      const elDec = document.getElementById('driver-count-dec');
+
+      if (elAll) elAll.textContent = countAll;
+      if (elDurAlert) elDurAlert.textContent = countExceedDur;
+      if (elWarn) elWarn.textContent = countWarn;
+      if (elDanger) elDanger.textContent = countDanger;
+      if (elInc) elInc.textContent = countInc;
+      if (elDec) elDec.textContent = countDec;
+
+      const query = (document.getElementById('driver-search')?.value || '').toLowerCase().trim();
+
+      const filtered = drivers.filter(d => {
+        if (currentDriverFilter === 'exceed_dur' && (d.isCancelled || d.durFinMin <= maxDurationMinutes)) return false;
+        if (currentDriverFilter === 'warn' && (d.isCancelled || d.condFinMin <= 270)) return false;
+        if (currentDriverFilter === 'danger' && (d.isCancelled || d.condFinMin <= 540)) return false;
+        if (currentDriverFilter === 'inc' && (d.isCancelled || d.condDiffMin <= 0)) return false;
+        if (currentDriverFilter === 'dec' && (d.isCancelled || d.condDiffMin >= 0)) return false;
+
+        if (query) {
+          const matchDriver = (d.driver || '').toLowerCase().includes(query);
+          const matchPlate = (d.plate || '').toLowerCase().includes(query);
+          const matchRoute = (d.routeId || '').toLowerCase().includes(query);
+          const matchId = (d.driverId || '').toLowerCase().includes(query);
+          if (!matchDriver && !matchPlate && !matchRoute && !matchId) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="12" style="text-align: center; padding: 32px; color: var(--text-muted);">
+              No se encontraron registros de choferes con el criterio seleccionado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(d => {
+        const tr = document.createElement('tr');
+        const isExceedingDuration = !d.isCancelled && d.durFinMin > maxDurationMinutes;
+
+        // Status badge
+        let badgeHtml = '';
+        if (d.isCancelled) {
+          badgeHtml = '<span class="gm-badge badge-sinasignar">Ruta Suprimida</span>';
+        } else {
+          // 1. Driving tachograph status
+          if (d.statusAlert === 'danger') {
+            badgeHtml += '<span class="gm-badge badge-tachograph-danger">🔴 &gt; 9h Conducción</span> ';
+          } else if (d.statusAlert === 'warn') {
+            badgeHtml += '<span class="gm-badge badge-tachograph-warn">🟡 &gt; 4.5h Conducción</span> ';
+          } else {
+            badgeHtml += '<span class="gm-badge badge-tachograph-ok">🟢 Conducción Óptima</span> ';
+          }
+
+          // 2. Configurable Duration Limit status
+          if (isExceedingDuration) {
+            badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Duración (&gt; ${maxDurationHoursConfig}h)</span>`;
+          } else if (d.isExtendedShift) {
+            badgeHtml += '<span class="gm-badge badge-tachograph-extended" style="margin-left: 2px;">🟣 Servicio &gt; 24h</span>';
+          }
+        }
+
+        // Cond diff badge
+        let condDiffHtml = '-';
+        if (!d.isCancelled && d.condInitMin !== null) {
+          const cDiff = d.condDiffMin;
+          const sign = cDiff >= 0 ? '+' : '';
+          const badgeClass = cDiff <= 0 ? 'delta-green' : (cDiff > 60 ? 'delta-orange' : 'delta-blue');
+          condDiffHtml = `<span class="delta-badge ${badgeClass}">${sign}${formatMinutesToHuman(cDiff)}</span>`;
+        }
+
+        // Dur diff badge
+        let durDiffHtml = '-';
+        if (!d.isCancelled && d.durInitMin !== null) {
+          const dDiff = d.durDiffMin;
+          const sign = dDiff >= 0 ? '+' : '';
+          const badgeClass = dDiff <= 0 ? 'delta-green' : (dDiff > 120 ? 'delta-orange' : 'delta-blue');
+          durDiffHtml = `<span class="delta-badge ${badgeClass}">${sign}${formatMinutesToHuman(dDiff)}</span>`;
+        }
+
+        // Operational time / delivery ratio
+        let nonDrivingHtml = '-';
+        if (!d.isCancelled) {
+          nonDrivingHtml = `
+            <strong>${formatMinutesToHuman(d.nonDrivingMin)}</strong>
+            <span class="pct pct-norm" style="margin-left: 4px;" title="${100 - d.ratioDriving}% del tiempo dedicado a carga, descarga y paradas">${100 - d.ratioDriving}%</span>
+          `;
+        }
+
+        const driverChangeNote = d.driverChanged
+          ? `<div style="font-size: 10px; color: var(--gm-orange); margin-top: 2px;">⇄ Reasignado de: ${d.driverInit}</div>`
+          : '';
+
+        // Final duration with alert chip if exceeding configured limit
+        const durFinColor = isExceedingDuration ? '#b91c1c' : 'var(--gm-blue-dark)';
+        const durAlertChip = isExceedingDuration
+          ? `<span class="delta-badge delta-orange" style="font-size: 10px; margin-left: 4px;" title="Excede el límite configurable de ${maxDurationHoursConfig}h">⚠️ &gt; ${maxDurationHoursConfig}h</span>`
+          : '';
+
+        tr.innerHTML = `
+          <td>
+            <strong>${d.driver}</strong>
+            <span class="driver-id-badge">ID: ${d.driverId}</span>
+            ${driverChangeNote}
+          </td>
+          <td>
+            <span class="veh-chip">${d.plate}</span>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${d.vehicleType}</div>
+          </td>
+          <td><strong style="font-family: monospace; color: var(--gm-blue-dark);">${d.routeId}</strong></td>
+          <td>
+            <span class="schedule-pill" title="Horario inicio y fin planificado">
+              ${d.startTime || '--:--'} &rarr; ${d.endTime || '--:--'}
+            </span>
+          </td>
+          <td>
+            <span title="${d.condInitStr}">${d.condInitMin !== null ? formatMinutesToHuman(d.condInitMin) : '-'}</span>
+          </td>
+          <td>
+            <strong style="color: var(--gm-blue-dark);" title="${d.condFinStr}">${d.isCancelled ? 'Cancelada' : formatMinutesToHuman(d.condFinMin)}</strong>
+          </td>
+          <td>${condDiffHtml}</td>
+          <td>
+            <span title="${d.durInitStr}">${d.durInitMin !== null ? formatMinutesToHuman(d.durInitMin) : '-'}</span>
+          </td>
+          <td>
+            <strong style="color: ${durFinColor}; font-weight: 800;" title="${d.durFinStr}">${d.isCancelled ? '-' : formatMinutesToHuman(d.durFinMin)}</strong>
+            ${durAlertChip}
+          </td>
+          <td>${durDiffHtml}</td>
+          <td>${nonDrivingHtml}</td>
+          <td>${badgeHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Render Totals row in tfoot
+      if (tfoot && metrics) {
+        const totalCondDiff = metrics.totalDrivingDiff;
+        const totalDurDiff = metrics.totalDurDiff;
+        const activeCount = metrics.activeDriversCount || filtered.length;
+
+        tfoot.innerHTML = `
+          <tr class="table-totals-row">
+            <td colspan="4">
+              <strong>TOTALES CONSOLIDADOS (${activeCount} choferes activos &bull; ${metrics.countTachographAlerts} alertas)</strong>
+            </td>
+            <td><strong>${formatMinutesToHuman(metrics.totalDrivingInit, false, true)}</strong></td>
+            <td><strong style="color: var(--gm-blue-dark); font-size: 13px;">${formatMinutesToHuman(metrics.totalDrivingFin, false, true)}</strong></td>
+            <td>
+              <span class="delta-badge ${totalCondDiff <= 0 ? 'delta-green' : 'delta-orange'}">
+                ${totalCondDiff >= 0 ? '+' : ''}${formatMinutesToHuman(totalCondDiff, false, true)}
+              </span>
+            </td>
+            <td><strong>${formatMinutesToHuman(metrics.totalDurInit, false, true)}</strong></td>
+            <td><strong style="color: var(--gm-blue-dark); font-size: 13px;">${formatMinutesToHuman(metrics.totalDurFin, false, true)}</strong></td>
+            <td>
+              <span class="delta-badge ${totalDurDiff <= 0 ? 'delta-green' : 'delta-blue'}">
+                ${totalDurDiff >= 0 ? '+' : ''}${formatMinutesToHuman(totalDurDiff, false, true)}
+              </span>
+            </td>
+            <td><strong>${formatMinutesToHuman(metrics.totalNonDrivingFin, false, true)}</strong></td>
+            <td><span class="gm-badge badge-mantenido">Auditado</span></td>
+          </tr>
+        `;
+      }
     }
 
     // Render Orders Table with Distinct Palets and Bultos Columns and Rich Vehicle Headers
@@ -2306,15 +3102,74 @@
     }
 
     // Event listeners
-    document.querySelectorAll('.tab-btn').forEach(tab => {
+    document.querySelectorAll('#order-filters .tab-btn').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#order-filters .tab-btn').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         currentFilter = tab.getAttribute('data-filter');
         if (comparisonResult) {
           renderOrdersTable(comparisonResult.ordersComparison);
         }
       });
+    });
+
+    document.querySelectorAll('#driver-filters .driver-tab-btn').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#driver-filters .driver-tab-btn').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentDriverFilter = tab.getAttribute('data-driver-filter');
+        if (comparisonResult) {
+          renderDriverTimesTable(comparisonResult.driversComparison, comparisonResult.driverMetrics);
+        }
+      });
+    });
+
+    // Configurable Maximum Duration Listener
+    const maxDurInput = document.getElementById('input-max-duration');
+    if (maxDurInput) {
+      // Load saved preference if available
+      const savedMaxDur = localStorage.getItem('grupamar_max_duration_hours');
+      if (savedMaxDur) {
+        maxDurInput.value = savedMaxDur;
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-hours') === savedMaxDur);
+        });
+      }
+
+      maxDurInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val) && val > 0) {
+          localStorage.setItem('grupamar_max_duration_hours', val);
+          document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.classList.toggle('active', parseFloat(btn.getAttribute('data-hours')) === val);
+          });
+          if (comparisonResult) {
+            renderDriverTimesTable(comparisonResult.driversComparison, comparisonResult.driverMetrics);
+          }
+        }
+      });
+    }
+
+    // Quick duration preset buttons (8h, 9h, 10h, 12h)
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hours = btn.getAttribute('data-hours');
+        if (maxDurInput) {
+          maxDurInput.value = hours;
+          localStorage.setItem('grupamar_max_duration_hours', hours);
+          document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (comparisonResult) {
+            renderDriverTimesTable(comparisonResult.driversComparison, comparisonResult.driverMetrics);
+          }
+        }
+      });
+    });
+
+    document.getElementById('driver-search').addEventListener('input', () => {
+      if (comparisonResult) {
+        renderDriverTimesTable(comparisonResult.driversComparison, comparisonResult.driverMetrics);
+      }
     });
 
     document.getElementById('order-search').addEventListener('input', () => {

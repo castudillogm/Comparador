@@ -24,7 +24,15 @@ Herramienta analítica de auditoría y evaluación del rendimiento de algoritmos
    - Indicador de **Peso transportado vs. Capacidad máxima en Kg**.
    - Tabla comparativa de costes, kilometraje y paradas por ruta.
 
-4. **100% Autónomo y Confidencial:**
+4. **Control de Tiempos de Conducción y Jornada de Choferes:**
+   - Tabla comparativa de **Tiempo de Conducción** efectiva al volante (Inicial vs. Final con variación).
+   - Tabla comparativa de **Duración Total de Servicio / Jornada** por conductor y vehículo.
+   - **Límite de Duración Máxima Configurable**: selector dinámico (en horas) con botones rápidos (8h, 9h, 10h, 12h) para detectar instantáneamente rutas que excedan el umbral establecido.
+   - Cálculo automático de **Tiempo en Clientes / Carga y Descarga** (operativa de no conducción).
+   - Semáforo y alertas normativas de **Tacógrafo** (pausa reglamentaria > 4.5h, límite > 9h) y alerta de **Exceso de Duración de Servicio**.
+   - Resumen KPI con totales consolidados de la flota y filtros interactivos por tipo de jornada.
+
+5. **100% Autónomo y Confidencial:**
    - Se ejecuta íntegramente en el navegador web local en JavaScript nativo.
    - **Sin necesidad de APIs externas ni servidores**.
    - Máxima privacidad: ningún dato de clientes, rutas o costes sale de la red local.
