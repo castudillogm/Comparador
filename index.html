@@ -1661,7 +1661,10 @@
                 <th>Conducción Final</th>
                 <th>Dif. Conducción</th>
                 <th>Duración Inicial</th>
-                <th>Duración Final</th>
+                <th>Duración Ruta Final</th>
+                <th style="background: #0d1b7a; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2);" title="Suma acumulada de la duración de todas las rutas realizadas por este chofer en el Plan Final">
+                  Duración Total Chofer (∑ Rutas)
+                </th>
                 <th>Dif. Duración</th>
                 <th>Operativa en Destino</th>
                 <th>Estado y Tacógrafo</th>
@@ -2785,8 +2788,31 @@
       const dkpiMaxDurVal = document.getElementById('dkpi-max-dur-val');
       if (dkpiMaxDurVal) dkpiMaxDurVal.textContent = `${maxDurationHoursConfig}h`;
 
-      // Count routes exceeding the configurable duration limit
-      const countExceedDur = drivers.filter(d => !d.isCancelled && d.durFinMin > maxDurationMinutes).length;
+      // Compute accumulated totals per driver (sum of all routes for that driver in Final Plan)
+      const driverAccumulated = new Map();
+      drivers.forEach(d => {
+        if (!d.isCancelled) {
+          const key = d.driver;
+          if (!driverAccumulated.has(key)) {
+            driverAccumulated.set(key, {
+              routesCount: 0,
+              totalDurMin: 0,
+              totalCondMin: 0
+            });
+          }
+          const item = driverAccumulated.get(key);
+          item.routesCount++;
+          item.totalDurMin += (d.durFinMin || 0);
+          item.totalCondMin += (d.condFinMin || 0);
+        }
+      });
+
+      // Count routes or drivers exceeding the configurable duration limit (either single route or driver total)
+      const countExceedDur = drivers.filter(d => {
+        if (d.isCancelled) return false;
+        const dAccum = driverAccumulated.get(d.driver);
+        return (d.durFinMin > maxDurationMinutes) || (dAccum && dAccum.totalDurMin > maxDurationMinutes);
+      }).length;
 
       const dkpiDurAlertCount = document.getElementById('dkpi-dur-alert-count');
       const dkpiDurAlertSub = document.getElementById('dkpi-dur-alert-sub');
@@ -2824,7 +2850,13 @@
       const query = (document.getElementById('driver-search')?.value || '').toLowerCase().trim();
 
       const filtered = drivers.filter(d => {
-        if (currentDriverFilter === 'exceed_dur' && (d.isCancelled || d.durFinMin <= maxDurationMinutes)) return false;
+        if (currentDriverFilter === 'exceed_dur') {
+          if (d.isCancelled) return false;
+          const dAccum = driverAccumulated.get(d.driver);
+          const exceedsRoute = d.durFinMin > maxDurationMinutes;
+          const exceedsTotal = dAccum && dAccum.totalDurMin > maxDurationMinutes;
+          if (!exceedsRoute && !exceedsTotal) return false;
+        }
         if (currentDriverFilter === 'warn' && (d.isCancelled || d.condFinMin <= 270)) return false;
         if (currentDriverFilter === 'danger' && (d.isCancelled || d.condFinMin <= 540)) return false;
         if (currentDriverFilter === 'inc' && (d.isCancelled || d.condDiffMin <= 0)) return false;
@@ -2843,7 +2875,7 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="12" style="text-align: center; padding: 32px; color: var(--text-muted);">
+            <td colspan="13" style="text-align: center; padding: 32px; color: var(--text-muted);">
               No se encontraron registros de choferes con el criterio seleccionado.
             </td>
           </tr>
@@ -2854,6 +2886,13 @@
       filtered.forEach(d => {
         const tr = document.createElement('tr');
         const isExceedingDuration = !d.isCancelled && d.durFinMin > maxDurationMinutes;
+
+        // Accumulated driver data
+        const dAccum = driverAccumulated.get(d.driver) || { routesCount: 1, totalDurMin: d.durFinMin || 0, totalCondMin: d.condFinMin || 0 };
+        const driverTotalDurMin = dAccum.totalDurMin;
+        const routesCount = dAccum.routesCount;
+        const isExceedingDriverTotal = !d.isCancelled && driverTotalDurMin > maxDurationMinutes;
+        const isMultiRoute = routesCount > 1;
 
         // Status badge
         let badgeHtml = '';
@@ -2872,6 +2911,8 @@
           // 2. Configurable Duration Limit status
           if (isExceedingDuration) {
             badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Duración (&gt; ${maxDurationHoursConfig}h)</span>`;
+          } else if (isExceedingDriverTotal && isMultiRoute) {
+            badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Total Chofer (${formatMinutesToHuman(driverTotalDurMin)} &gt; ${maxDurationHoursConfig}h)</span>`;
           } else if (d.isExtendedShift) {
             badgeHtml += '<span class="gm-badge badge-tachograph-extended" style="margin-left: 2px;">🟣 Servicio &gt; 24h</span>';
           }
@@ -2893,6 +2934,26 @@
           const sign = dDiff >= 0 ? '+' : '';
           const badgeClass = dDiff <= 0 ? 'delta-green' : (dDiff > 120 ? 'delta-orange' : 'delta-blue');
           durDiffHtml = `<span class="delta-badge ${badgeClass}">${sign}${formatMinutesToHuman(dDiff)}</span>`;
+        }
+
+        // Accumulated driver duration column content
+        let driverTotalDurHtml = '-';
+        if (!d.isCancelled) {
+          const durTotalColor = isExceedingDriverTotal ? '#b91c1c' : 'var(--gm-blue-dark)';
+          const countBadge = isMultiRoute
+            ? `<div style="font-size: 10px; color: var(--gm-blue-light); font-weight: 700; margin-top: 2px;">∑ Suma de ${routesCount} rutas</div>`
+            : `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(1 ruta)</div>`;
+          const alertBadge = isExceedingDriverTotal
+            ? `<span class="delta-badge delta-orange" style="font-size: 9px; margin-top: 2px; display: inline-block;" title="La duración acumulada del chofer (${formatMinutesToHuman(driverTotalDurMin)}) supera el límite de ${maxDurationHoursConfig}h">⚠️ Excede ${maxDurationHoursConfig}h</span>`
+            : '';
+
+          driverTotalDurHtml = `
+            <div style="font-weight: 800; font-size: 13px; color: ${durTotalColor};">
+              ${formatMinutesToHuman(driverTotalDurMin)}
+            </div>
+            ${countBadge}
+            ${alertBadge}
+          `;
         }
 
         // Operational time / delivery ratio
@@ -2944,6 +3005,9 @@
             <strong style="color: ${durFinColor}; font-weight: 800;" title="${d.durFinStr}">${d.isCancelled ? '-' : formatMinutesToHuman(d.durFinMin)}</strong>
             ${durAlertChip}
           </td>
+          <td style="background: rgba(3, 169, 236, 0.05); border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+            ${driverTotalDurHtml}
+          </td>
           <td>${durDiffHtml}</td>
           <td>${nonDrivingHtml}</td>
           <td>${badgeHtml}</td>
@@ -2971,6 +3035,9 @@
             </td>
             <td><strong>${formatMinutesToHuman(metrics.totalDurInit, false, true)}</strong></td>
             <td><strong style="color: var(--gm-blue-dark); font-size: 13px;">${formatMinutesToHuman(metrics.totalDurFin, false, true)}</strong></td>
+            <td style="background: #cbd5e1 !important; color: var(--gm-blue-dark);">
+              <strong style="font-size: 13px;" title="Duración acumulada de toda la flota">${formatMinutesToHuman(metrics.totalDurFin, false, true)}</strong>
+            </td>
             <td>
               <span class="delta-badge ${totalDurDiff <= 0 ? 'delta-green' : 'delta-blue'}">
                 ${totalDurDiff >= 0 ? '+' : ''}${formatMinutesToHuman(totalDurDiff, false, true)}

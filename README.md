@@ -26,10 +26,10 @@ Herramienta analítica de auditoría y evaluación del rendimiento de algoritmos
 
 4. **Control de Tiempos de Conducción y Jornada de Choferes:**
    - Tabla comparativa de **Tiempo de Conducción** efectiva al volante (Inicial vs. Final con variación).
-   - Tabla comparativa de **Duración Total de Servicio / Jornada** por conductor y vehículo.
-   - **Límite de Duración Máxima Configurable**: selector dinámico (en horas) con botones rápidos (8h, 9h, 10h, 12h) para detectar instantáneamente rutas que excedan el umbral establecido.
+   - Tabla comparativa de **Duración de Ruta Individual vs. Duración Total Chofer (∑ Rutas)**: consolida y suma automáticamente todas las rutas realizadas por un mismo chofer en la jornada.
+   - **Límite de Duración Máxima Configurable**: selector dinámico (en horas) con botones rápidos (8h, 9h, 10h, 12h) para detectar instantáneamente conductores y rutas que excedan el umbral establecido.
    - Cálculo automático de **Tiempo en Clientes / Carga y Descarga** (operativa de no conducción).
-   - Semáforo y alertas normativas de **Tacógrafo** (pausa reglamentaria > 4.5h, límite > 9h) y alerta de **Exceso de Duración de Servicio**.
+   - Semáforo y alertas normativas de **Tacógrafo** (pausa reglamentaria > 4.5h, límite > 9h) y alertas por **Exceso de Duración Total de Servicio**.
    - Resumen KPI con totales consolidados de la flota y filtros interactivos por tipo de jornada.
 
 5. **100% Autónomo y Confidencial:**
