@@ -850,6 +850,45 @@
     .pct-ok { background: #e6f7ef; color: #0d8a55; }
     .pct-norm { background: var(--gm-blue-light-bg); color: var(--gm-blue-light); }
 
+    /* Vehicle Times & Schedule Summary Bar */
+    .veh-times-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      width: 100%;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(9, 17, 151, 0.12);
+    }
+
+    .veh-time-badge {
+      background: #ffffff;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid rgba(9, 17, 151, 0.15);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .veh-time-badge strong {
+      color: var(--gm-blue-dark);
+      font-weight: 700;
+    }
+
+    .veh-time-lbl {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 700;
+    }
+
     /* Tags for Palets and Bultos */
     .tag-palet {
       display: inline-flex;
@@ -1761,6 +1800,7 @@
                 <th>Cliente / Destino</th>
                 <th style="text-align: center;">Palets</th>
                 <th style="text-align: center;">Bultos</th>
+                <th style="text-align: center;" title="Hora prevista de llegada al cliente y tiempo estimado de trámite">Hora Servicio / Ventana</th>
                 <th>Ruta Inicial</th>
                 <th>Ruta Final</th>
                 <th>Matrícula Final</th>
@@ -2127,6 +2167,12 @@
         const endTime = endMatch ? endMatch[1].trim() : '';
         const waitTime = waitMatch ? waitMatch[1].trim() : '';
 
+        // Waiting time and trámite time from timeline
+        const waitBlocks = [...routeChunk.matchAll(/data-tooltip-content="Tiempo de espera"[^>]*style="[^"]*width:\s*([\d.]+)%/gi)];
+        const waitPct = waitBlocks.reduce((sum, m) => sum + parseFloat(m[1]), 0);
+        const waitMinutes = Math.round((waitPct / 100) * durationMinutes);
+        const tramiteMinutes = Math.max(0, durationMinutes - drivingMinutes - waitMinutes);
+
         const routeObj = {
           id: routeCode,
           driver: rh.driver,
@@ -2152,6 +2198,8 @@
           startTime,
           endTime,
           waitTime,
+          waitMinutes,
+          tramiteMinutes,
           orderCodes: []
         };
 
@@ -2171,6 +2219,20 @@
           const unitsList = unitsStr.split(',').map(s => s.trim());
           const isAdr = card.includes('<span>ADR</span>');
 
+          // Extract stop planned arrival time and estimated stop duration
+          const timeMatch = card.match(/<span>(\d{1,2}:\d{2})<\/span>/);
+          const serviceTime = timeMatch ? timeMatch[1].trim() : '--:--';
+
+          const actionMatch = card.match(/data-tooltip-id="tooltip-action-group-(\d+)"/);
+          let stopTramiteMin = null;
+          if (actionMatch) {
+            const tlRx = new RegExp('tooltip-action-timeline-' + actionMatch[1] + '[^>]*style="[^"]*width:\\s*([\\d.]+)%', 'i');
+            const tlMatch = routeChunk.match(tlRx);
+            if (tlMatch) {
+              stopTramiteMin = Math.max(1, Math.round((parseFloat(tlMatch[1]) / 100) * durationMinutes));
+            }
+          }
+
           codesInCard.forEach((code, idx) => {
             if (!routeObj.orderCodes.includes(code)) {
               routeObj.orderCodes.push(code);
@@ -2187,6 +2249,10 @@
               }
               if (existing.palets === '-' && parsedUnits.palets !== '-') existing.palets = parsedUnits.palets;
               if (existing.bultos === '-' && parsedUnits.bultos !== '-') existing.bultos = parsedUnits.bultos;
+              if ((!existing.serviceTime || existing.serviceTime === '--:--' || existing.serviceTime === '-') && serviceTime !== '--:--') {
+                existing.serviceTime = serviceTime;
+              }
+              if (!existing.stopTramiteMin && stopTramiteMin) existing.stopTramiteMin = stopTramiteMin;
             } else {
               data.ordersMap.set(code, {
                 code,
@@ -2195,6 +2261,8 @@
                 client: clientName,
                 palets: parsedUnits.palets,
                 bultos: parsedUnits.bultos,
+                serviceTime,
+                stopTramiteMin,
                 routeId: routeObj.id,
                 driver: rh.driver,
                 plate,
@@ -2421,6 +2489,8 @@
           maxPallets: finOrder.maxPallets,
           pctPal: finOrder.pctPal,
           isAdr: finOrder.isAdr,
+          serviceTime: finOrder.serviceTime || '-',
+          stopTramiteMin: finOrder.stopTramiteMin || null,
           movementType,
           note
         });
@@ -2455,6 +2525,8 @@
             maxPallets: '0',
             pctPal: 0,
             isAdr: false,
+            serviceTime: '-',
+            stopTramiteMin: null,
             movementType: 'sinasignar',
             note: `⚠️ Retirado de vehículo ${prevRouteOrder.plate} a Sin Asignar por el especialista`
           });
@@ -2483,6 +2555,8 @@
             maxPallets: '0',
             pctPal: 0,
             isAdr: false,
+            serviceTime: '-',
+            stopTramiteMin: null,
             movementType: 'sinasignar',
             note: finUnasg.unassignedReason ? `⚠️ ${finUnasg.unassignedReason}` : 'Permanece sin asignar en ambos planes'
           });
@@ -2511,6 +2585,8 @@
           maxPallets: '0',
           pctPal: 0,
           isAdr: initOrder.isAdr,
+          serviceTime: initOrder.serviceTime || '-',
+          stopTramiteMin: initOrder.stopTramiteMin || null,
           movementType: 'eliminado',
           note: 'Descartado del plan por el especialista'
         });
@@ -2639,6 +2715,29 @@
       const avgDrivingFin = activeDriversCount > 0 ? Math.round(totalDrivingFin / activeDriversCount) : 0;
       const countTachographAlerts = [...finDriversMap.values()].filter(d => (d.totalCondMin || 0) > 270).length;
 
+      const vehicleRoutesMap = new Map();
+      fin.routes.forEach(fr => {
+        const ir = init.routes.find(r => r.plate === fr.plate || (r.isEvacor && r.extCode && r.extCode === fr.extCode) || r.driver === fr.driver);
+        vehicleRoutesMap.set(fr.plate, {
+          plate: fr.plate,
+          driver: fr.driver,
+          vehicleType: fr.vehicleType,
+          isEvacor: fr.isEvacor,
+          extCode: fr.extCode,
+          routeId: fr.id,
+          startTime: fr.startTime,
+          endTime: fr.endTime,
+          durFinMin: fr.durationMinutes,
+          durInitMin: ir ? ir.durationMinutes : null,
+          durDiffMin: ir ? (fr.durationMinutes - ir.durationMinutes) : 0,
+          condFinMin: fr.drivingMinutes,
+          condInitMin: ir ? ir.drivingMinutes : null,
+          condDiffMin: ir ? (fr.drivingMinutes - ir.drivingMinutes) : 0,
+          waitMin: fr.waitMinutes || 0,
+          tramiteMin: fr.tramiteMinutes || 0
+        });
+      });
+
       return {
         efficiencyScore,
         reassignPercent,
@@ -2650,6 +2749,7 @@
         eliminadosCount,
         ordersComparison,
         driversComparison,
+        vehicleRoutesMap,
         driverMetrics: {
           totalDrivingInit,
           totalDrivingFin,
@@ -3198,13 +3298,16 @@
 
           let palBadgeClass = (o.pctPal || 0) > 95 ? 'pct-high' : ((o.pctPal || 0) > 70 ? 'pct-ok' : 'pct-norm');
           let kgBadgeClass = (o.pctKg || 0) > 90 ? 'pct-high' : ((o.pctKg || 0) > 50 ? 'pct-ok' : 'pct-norm');
+          const vMetrics = comparisonResult?.vehicleRoutesMap?.get(currentVeh);
 
           groupTr.innerHTML = `
-            <td colspan="10" class="group-cell">
+            <td colspan="11" class="group-cell">
               <div class="veh-banner-content">
                 <div class="veh-main-info">
                   ${currentVeh !== 'Sin Vehículo' ? `
-                    🚚 Vehículo: <strong>${currentVeh}</strong> &bull; ${o.driver || 'Conductor asignado'} &bull; <span class="tag-badge">${o.vehicleType}</span>
+                    🚚 Vehículo: <strong>${currentVeh}</strong>
+                    ${vMetrics && vMetrics.isEvacor && vMetrics.extCode ? `<span class="evacor-badge">#${vMetrics.extCode}</span> <span class="ext-tag">Externo</span>` : ''}
+                    &bull; ${o.driver || 'Conductor asignado'} &bull; <span class="tag-badge">${o.vehicleType}</span>
                   ` : `
                     📦 <strong>Pedidos Sin Asignar en Plan Final</strong> &bull; <span class="tag-badge" style="background: rgba(224, 76, 56, 0.15); color: var(--gm-red); border: 1px solid rgba(224, 76, 56, 0.3);">Pendientes de Asignación / Flota</span>
                   `}
@@ -3228,6 +3331,45 @@
                     </div>
                   `}
                 </div>
+
+                ${(currentVeh !== 'Sin Vehículo' && vMetrics) ? `
+                  <div class="veh-times-bar">
+                    <div class="veh-time-badge" title="Duración de la ruta: Inicial vs. Final">
+                      <span class="veh-time-lbl">⏱️ Duración:</span>
+                      <strong>${vMetrics.durInitMin !== null ? formatMinutesToHuman(vMetrics.durInitMin) : '--'} &rarr; ${formatMinutesToHuman(vMetrics.durFinMin)}</strong>
+                      ${vMetrics.durInitMin !== null ? `
+                        <span class="delta-badge ${vMetrics.durDiffMin <= 0 ? 'delta-green' : 'delta-blue'}" style="font-size: 10px; padding: 1px 5px;">
+                          ${vMetrics.durDiffMin >= 0 ? '+' : ''}${formatMinutesToHuman(vMetrics.durDiffMin)}
+                        </span>
+                      ` : ''}
+                    </div>
+
+                    <div class="veh-time-badge" title="Tiempo de conducción al volante: Inicial vs. Final">
+                      <span class="veh-time-lbl">🚗 Conducción:</span>
+                      <strong>${vMetrics.condInitMin !== null ? formatMinutesToHuman(vMetrics.condInitMin) : '--'} &rarr; ${formatMinutesToHuman(vMetrics.condFinMin)}</strong>
+                      ${vMetrics.condInitMin !== null ? `
+                        <span class="delta-badge ${vMetrics.condDiffMin <= 0 ? 'delta-green' : 'delta-orange'}" style="font-size: 10px; padding: 1px 5px;">
+                          ${vMetrics.condDiffMin >= 0 ? '+' : ''}${formatMinutesToHuman(vMetrics.condDiffMin)}
+                        </span>
+                      ` : ''}
+                    </div>
+
+                    <div class="veh-time-badge" title="Ventana horaria de inicio y fin planificado del servicio">
+                      <span class="veh-time-lbl">🕒 Horario:</span>
+                      <strong>${vMetrics.startTime || '--:--'} &rarr; ${vMetrics.endTime || '--:--'}</strong>
+                    </div>
+
+                    <div class="veh-time-badge" title="Tiempo total de esperas de apertura / ventanas de clientes en la ruta">
+                      <span class="veh-time-lbl">⏳ Espera:</span>
+                      <strong>${vMetrics.waitMin > 0 ? formatMinutesToHuman(vMetrics.waitMin) : '0m'}</strong>
+                    </div>
+
+                    <div class="veh-time-badge" title="Tiempo dedicado a carga, descarga y gestiones en clientes">
+                      <span class="veh-time-lbl">📦 Trámite / Operativa:</span>
+                      <strong>${formatMinutesToHuman(vMetrics.tramiteMin)}</strong>
+                    </div>
+                  </div>
+                ` : ''}
               </div>
             </td>
           `;
@@ -3253,6 +3395,12 @@
           <td>${o.client}</td>
           <td style="text-align: center;">${paletDisplay}</td>
           <td style="text-align: center;">${bultoDisplay}</td>
+          <td style="text-align: center;">
+            ${o.serviceTime && o.serviceTime !== '--:--' && o.serviceTime !== '-' ? `
+              <span class="schedule-pill" title="Hora prevista de llegada / servicio">🕒 ${o.serviceTime}</span>
+              ${o.stopTramiteMin ? `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;" title="Tiempo estimado de trámite / descarga">⏳ ~${o.stopTramiteMin}m trámite</div>` : ''}
+            ` : `<span style="color: var(--text-muted);">-</span>`}
+          </td>
           <td>${o.routeInit}</td>
           <td><strong>${o.routeFinal}</strong></td>
           <td><span class="veh-chip">${o.vehicleFinal}</span></td>
@@ -3268,7 +3416,7 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" style="text-align: center; padding: 32px; color: var(--text-muted);">
+            <td colspan="11" style="text-align: center; padding: 32px; color: var(--text-muted);">
               No se encontraron pedidos con el criterio seleccionado.
             </td>
           </tr>

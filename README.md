@@ -17,9 +17,16 @@ Herramienta analítica de auditoría y evaluación del rendimiento de algoritmos
    - Separación estricta entre **Albarán** (`T...`) y **Expedición** (`E...`).
    - Identificación del **Cliente y Destino** real de cada entrega.
    - Desglose logístico real entre **Palets** (paletizado completo) y **Bultos** (paquetería suelta / mixta).
+   - **Hora Servicio y Tiempo de Trámite por Pedido**: columna dedicada *"Hora Servicio / Ventana"* indicando la hora planificada de llegada (ej: `🕒 08:00`) y la estimación del tiempo de trámite/descarga en el cliente (ej: `~4m trámite`).
 
-3. **Capacidades y Flota de Vehículos:**
+3. **Capacidades, Tiempos y Flota de Vehículos:**
    - Agrupación ordenada de pedidos por vehículo con banner consolidado.
+   - **Barra Resumen de Tiempos por Vehículo**:
+     - **Duración Inicial vs. Final**: comparativa visual directa con badge de variación (`+` / `-`).
+     - **Conducción Inicial vs. Final**: tiempo efectivo al volante inicial vs. final.
+     - **Horario de Ruta**: hora de inicio y finalización planificada de la ruta (`08:00 → 13:50`).
+     - **Tiempo de Espera**: tiempo muerto o espera total acumulado en la ruta.
+     - **Tiempo de Trámite / Operativa**: tiempo total dedicado a operativa y entrega a clientes.
    - Indicador de ocupación de **Palets equivalentes transportados vs. Capacidad máxima**.
    - Indicador de **Peso transportado vs. Capacidad máxima en Kg**.
    - Tabla comparativa de costes, kilometraje y paradas por ruta.
