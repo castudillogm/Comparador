@@ -25,12 +25,12 @@ Herramienta analítica de auditoría y evaluación del rendimiento de algoritmos
    - Tabla comparativa de costes, kilometraje y paradas por ruta.
 
 4. **Control de Tiempos de Conducción y Jornada de Choferes:**
-   - Tabla comparativa de **Tiempo de Conducción** efectiva al volante (Inicial vs. Final con variación).
-   - Tabla comparativa de **Duración de Ruta Individual vs. Duración Total Chofer (∑ Rutas)**: consolida y suma automáticamente todas las rutas realizadas por un mismo chofer en la jornada.
-   - **Límite de Duración Máxima Configurable**: selector dinámico (en horas) con botones rápidos (8h, 9h, 10h, 12h) para detectar instantáneamente conductores y rutas que excedan el umbral establecido.
-   - Cálculo automático de **Tiempo en Clientes / Carga y Descarga** (operativa de no conducción).
-   - Semáforo y alertas normativas de **Tacógrafo** (pausa reglamentaria > 4.5h, límite > 9h) y alertas por **Exceso de Duración Total de Servicio**.
-   - Resumen KPI con totales consolidados de la flota y filtros interactivos por tipo de jornada.
+   - **Fila Única por Conductor / Vehículo**: cada chofer aparece una única vez en la tabla, consolidando y sumando todas las rutas que haya realizado en la jornada.
+   - **Identificación de Vehículos Externos Evacor**: asociación automática de rutas externas por su código numérico distintivo de Hedyla (badge púrpura `#93262`, `#36777`, etc.), reflejando el tipo de vehículo asignado (*F- FURGONETA*, *E- HASTA 7.5 TN* o mixtos).
+   - **Columna Unificada "Duración Total"**: simplificación de la tabla eliminando duraciones parciales y mostrando directamente la duración acumulada total del servicio y su comparativa frente al plan inicial.
+   - **Límite de Duración Máxima Configurable**: selector dinámico (en horas) con botones predefinidos (8h, 9h, 10h, 12h) para auditar excesos de jornada en tiempo real.
+   - **Tiempo de Operativa en Destino**: cálculo de tiempos dedicados a carga, descarga y paradas (tiempo de no conducción) y su porcentaje sobre la jornada total.
+   - **Semáforo y Normativa de Tacógrafo**: alertas visuales de conducción continua (> 4.5h) y jornada máxima (> 9h).
 
 5. **100% Autónomo y Confidencial:**
    - Se ejecuta íntegramente en el navegador web local en JavaScript nativo.

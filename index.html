@@ -1084,6 +1084,61 @@
       border: 1px solid #d8b4fe;
     }
 
+    /* EVACOR and External Vehicle Styles */
+    .evacor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #2b0b61;
+      color: #ffffff !important;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 1px 3px rgba(43, 11, 97, 0.35);
+      border: 1px solid #4c1d95;
+    }
+
+    .ext-tag {
+      display: inline-block;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-weight: 700;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #c4b5fd;
+    }
+
+    .routes-flex-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .route-badge-pill {
+      display: inline-block;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: var(--gm-blue-dark);
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-evacor-ext {
+      background: #5b21b6;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 12px;
+    }
+
     .table-totals-row {
       background: #e2e8f0 !important;
       font-weight: 800;
@@ -1655,15 +1710,13 @@
               <tr>
                 <th>Conductor</th>
                 <th>Vehículo / Matrícula</th>
-                <th>Ruta</th>
+                <th>Rutas</th>
                 <th>Horario Planificado</th>
                 <th>Conducción Inicial</th>
                 <th>Conducción Final</th>
                 <th>Dif. Conducción</th>
-                <th>Duración Inicial</th>
-                <th>Duración Ruta Final</th>
-                <th style="background: #0d1b7a; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2);" title="Suma acumulada de la duración de todas las rutas realizadas por este chofer en el Plan Final">
-                  Duración Total Chofer (∑ Rutas)
+                <th style="background: #0d1b7a; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2);" title="Duración Total acumulada del conductor o vehículo externo (suma de rutas)">
+                  Duración Total
                 </th>
                 <th>Dif. Duración</th>
                 <th>Operativa en Destino</th>
@@ -2023,7 +2076,10 @@
         const routeChunk = html.substring(rh.pos, nextPos);
 
         const plateMatch = routeChunk.match(/>([0-9]{4}\s*[A-Z]{3}|virtual-traction-\d+)</i);
-        const plate = plateMatch ? plateMatch[1].trim() : `Vehículo ${i+1}`;
+        const extCodeMatch = routeChunk.match(/<span[^>]*color="primary"[^>]*>(\d+)<\/span>/i);
+        const extCode = extCodeMatch ? extCodeMatch[1].trim() : null;
+        const isEvacor = rh.driver.toUpperCase().includes('EVACOR');
+        let plate = plateMatch ? plateMatch[1].trim() : (isEvacor && extCode ? `EVACOR #${extCode}` : `Vehículo ${i+1}`);
 
         const rcMatch = routeChunk.match(/\b(H[A-Z]{3}\d{7})\b/);
         const routeCode = rcMatch ? rcMatch[1] : `R-${plate}`;
@@ -2075,6 +2131,9 @@
           id: routeCode,
           driver: rh.driver,
           driverId: rh.driverId,
+          isEvacor,
+          extCode,
+          isExternal: isEvacor,
           plate,
           status,
           vehicleType,
@@ -2227,6 +2286,52 @@
       data.totalDurationMinutes = data.routes.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
       data.totalOrders = (data.plannedOrders || (data.ordersMap.size - data.unassignedOrders.length)) + data.unassignedOrders.length;
       return data;
+    }
+
+    // Consolidate routes by driver or by external vehicle (Evacor purple code)
+    function consolidateDrivers(routes) {
+      const map = new Map();
+      if (!routes || !Array.isArray(routes)) return map;
+
+      routes.forEach((r, idx) => {
+        const isEvacor = r.isEvacor || (r.driver && r.driver.toUpperCase().includes('EVACOR'));
+        const extCode = r.extCode || null;
+        const key = (isEvacor && extCode) ? `EVACOR_${extCode}` : (r.driver || `DRIVER_${idx}`);
+
+        if (!map.has(key)) {
+          map.set(key, {
+            key,
+            driver: r.driver,
+            driverId: r.driverId,
+            isEvacor,
+            extCode,
+            isExternal: isEvacor,
+            plates: new Set(),
+            vehicleTypes: new Set(),
+            routes: [],
+            firstStart: r.startTime,
+            lastEnd: r.endTime,
+            totalDurMin: 0,
+            totalCondMin: 0
+          });
+        }
+
+        const item = map.get(key);
+        if (r.plate) item.plates.add(r.plate);
+        if (r.vehicleType) item.vehicleTypes.add(r.vehicleType);
+        if (r.id) item.routes.push(r.id);
+        item.totalDurMin += (r.durationMinutes || 0);
+        item.totalCondMin += (r.drivingMinutes || 0);
+
+        if (r.startTime && (!item.firstStart || r.startTime < item.firstStart)) {
+          item.firstStart = r.startTime;
+        }
+        if (r.endTime && (!item.lastEnd || r.endTime > item.lastEnd)) {
+          item.lastEnd = r.endTime;
+        }
+      });
+
+      return map;
     }
 
     // --- Comparative Analysis ---
@@ -2415,40 +2520,42 @@
       const efficiencyScore = totalHandled > 0 ? Math.round((mantenidosCount / totalHandled) * 100) : 100;
       const reassignPercent = totalHandled > 0 ? ((reasignadosCount / totalHandled) * 100).toFixed(1) : 0;
 
-      // 4. Driver & Route Times Comparative Analysis
+      // 4. Driver & Route Times Comparative Analysis (Consolidated per Unique Driver / EVACOR Vehicle)
+      const initDriversMap = consolidateDrivers(init.routes);
+      const finDriversMap = consolidateDrivers(fin.routes);
+
       const driversComparison = [];
-      const usedInitRoutes = new Set();
+      const handledInitKeys = new Set();
 
-      fin.routes.forEach(fr => {
-        // Priority 1: Same driver & same plate
-        let match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.driver === fr.driver && ir.plate === fr.plate);
-        // Priority 2: Same plate (vehicle)
-        if (!match) {
-          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.plate === fr.plate);
+      for (const [key, finItem] of finDriversMap.entries()) {
+        let initItem = initDriversMap.get(key);
+        if (!initItem) {
+          // Fallback matching for regular drivers by common plate or driver name
+          for (const [ik, iv] of initDriversMap.entries()) {
+            if (!handledInitKeys.has(ik) && !iv.isEvacor && !finItem.isEvacor) {
+              const hasCommonPlate = [...finItem.plates].some(p => iv.plates.has(p));
+              if (hasCommonPlate || iv.driver === finItem.driver) {
+                initItem = iv;
+                break;
+              }
+            }
+          }
         }
-        // Priority 3: Same driver
-        if (!match) {
-          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.driver === fr.driver);
-        }
-        // Priority 4: Same route code
-        if (!match) {
-          match = init.routes.find(ir => !usedInitRoutes.has(ir) && ir.id === fr.id);
-        }
 
-        if (match) usedInitRoutes.add(match);
+        if (initItem) handledInitKeys.add(initItem.key);
 
-        const condInitMin = match ? match.drivingMinutes : null;
-        const condFinMin = fr.drivingMinutes;
-        const condDiffMin = match ? (condFinMin - condInitMin) : 0;
+        const condInitMin = initItem ? initItem.totalCondMin : null;
+        const condFinMin = finItem.totalCondMin;
+        const condDiffMin = condFinMin - (condInitMin || 0);
 
-        const durInitMin = match ? match.durationMinutes : null;
-        const durFinMin = fr.durationMinutes;
-        const durDiffMin = match ? (durFinMin - durInitMin) : 0;
+        const durInitMin = initItem ? initItem.totalDurMin : null;
+        const durFinMin = finItem.totalDurMin;
+        const durDiffMin = durFinMin - (durInitMin || 0);
 
         const nonDrivingMin = Math.max(0, durFinMin - condFinMin);
         const ratioDriving = durFinMin > 0 ? Math.round((condFinMin / durFinMin) * 100) : 0;
 
-        let statusAlert = 'ok'; // ok, warn (>4.5h), danger (>9h)
+        let statusAlert = 'ok';
         if (condFinMin > 540) {
           statusAlert = 'danger'; // > 9 hours
         } else if (condFinMin > 270) {
@@ -2458,23 +2565,24 @@
         const isExtendedShift = durFinMin >= 1440; // >= 24h
 
         driversComparison.push({
-          driver: fr.driver,
-          driverId: fr.driverId,
-          driverInit: match ? match.driver : null,
-          driverChanged: match && match.driver !== fr.driver,
-          plate: fr.plate,
-          vehicleType: fr.vehicleType,
-          routeId: fr.id,
-          startTime: fr.startTime,
-          endTime: fr.endTime,
-          condInitStr: match ? (match.drivingStr || formatMinutesToHuman(condInitMin)) : '-',
+          key,
+          driver: finItem.driver,
+          driverId: finItem.driverId,
+          driverInit: initItem ? initItem.driver : null,
+          driverChanged: initItem && initItem.driver !== finItem.driver,
+          isEvacor: finItem.isEvacor,
+          extCode: finItem.extCode,
+          isExternal: finItem.isExternal,
+          plates: [...finItem.plates],
+          vehicleTypes: [...finItem.vehicleTypes],
+          routes: finItem.routes,
+          routesCount: finItem.routes.length,
+          startTime: finItem.firstStart,
+          endTime: finItem.lastEnd,
           condInitMin,
-          condFinStr: fr.drivingStr || formatMinutesToHuman(condFinMin),
           condFinMin,
           condDiffMin,
-          durInitStr: match ? (match.durationStr || formatMinutesToHuman(durInitMin)) : '-',
           durInitMin,
-          durFinStr: fr.durationStr || formatMinutesToHuman(durFinMin),
           durFinMin,
           durDiffMin,
           nonDrivingMin,
@@ -2483,31 +2591,32 @@
           isExtendedShift,
           isCancelled: false
         });
-      });
+      }
 
-      // Include any initial routes cancelled or omitted by the specialist
-      init.routes.forEach(ir => {
-        if (!usedInitRoutes.has(ir)) {
+      // Include any initial drivers/vehicles cancelled or omitted in the final plan
+      for (const [key, initItem] of initDriversMap.entries()) {
+        if (!handledInitKeys.has(key)) {
           driversComparison.push({
-            driver: ir.driver,
-            driverId: ir.driverId,
-            driverInit: ir.driver,
+            key,
+            driver: initItem.driver,
+            driverId: initItem.driverId,
+            driverInit: initItem.driver,
             driverChanged: false,
-            plate: ir.plate,
-            vehicleType: ir.vehicleType,
-            routeId: ir.id,
-            startTime: ir.startTime,
-            endTime: ir.endTime,
-            condInitStr: ir.drivingStr || formatMinutesToHuman(ir.drivingMinutes),
-            condInitMin: ir.drivingMinutes,
-            condFinStr: 'Cancelada',
+            isEvacor: initItem.isEvacor,
+            extCode: initItem.extCode,
+            isExternal: initItem.isExternal,
+            plates: [...initItem.plates],
+            vehicleTypes: [...initItem.vehicleTypes],
+            routes: initItem.routes,
+            routesCount: initItem.routes.length,
+            startTime: initItem.firstStart,
+            endTime: initItem.lastEnd,
+            condInitMin: initItem.totalCondMin,
             condFinMin: 0,
-            condDiffMin: -ir.drivingMinutes,
-            durInitStr: ir.durationStr || formatMinutesToHuman(ir.durationMinutes),
-            durInitMin: ir.durationMinutes,
-            durFinStr: '-',
+            condDiffMin: -initItem.totalCondMin,
+            durInitMin: initItem.totalDurMin,
             durFinMin: 0,
-            durDiffMin: -ir.durationMinutes,
+            durDiffMin: -initItem.totalDurMin,
             nonDrivingMin: 0,
             ratioDriving: 0,
             statusAlert: 'cancelled',
@@ -2515,7 +2624,7 @@
             isCancelled: true
           });
         }
-      });
+      }
 
       const totalDrivingInit = init.totalDrivingMinutes || 0;
       const totalDrivingFin = fin.totalDrivingMinutes || 0;
@@ -2526,9 +2635,9 @@
       const totalDurDiff = totalDurFin - totalDurInit;
 
       const totalNonDrivingFin = Math.max(0, totalDurFin - totalDrivingFin);
-      const avgDrivingFin = fin.routes.length > 0 ? Math.round(totalDrivingFin / fin.routes.length) : 0;
-      const countTachographAlerts = fin.routes.filter(r => (r.drivingMinutes || 0) > 270).length;
-      const activeDriversCount = new Set(fin.routes.map(r => r.driver)).size;
+      const activeDriversCount = finDriversMap.size;
+      const avgDrivingFin = activeDriversCount > 0 ? Math.round(totalDrivingFin / activeDriversCount) : 0;
+      const countTachographAlerts = [...finDriversMap.values()].filter(d => (d.totalCondMin || 0) > 270).length;
 
       return {
         efficiencyScore,
@@ -2788,31 +2897,8 @@
       const dkpiMaxDurVal = document.getElementById('dkpi-max-dur-val');
       if (dkpiMaxDurVal) dkpiMaxDurVal.textContent = `${maxDurationHoursConfig}h`;
 
-      // Compute accumulated totals per driver (sum of all routes for that driver in Final Plan)
-      const driverAccumulated = new Map();
-      drivers.forEach(d => {
-        if (!d.isCancelled) {
-          const key = d.driver;
-          if (!driverAccumulated.has(key)) {
-            driverAccumulated.set(key, {
-              routesCount: 0,
-              totalDurMin: 0,
-              totalCondMin: 0
-            });
-          }
-          const item = driverAccumulated.get(key);
-          item.routesCount++;
-          item.totalDurMin += (d.durFinMin || 0);
-          item.totalCondMin += (d.condFinMin || 0);
-        }
-      });
-
-      // Count routes or drivers exceeding the configurable duration limit (either single route or driver total)
-      const countExceedDur = drivers.filter(d => {
-        if (d.isCancelled) return false;
-        const dAccum = driverAccumulated.get(d.driver);
-        return (d.durFinMin > maxDurationMinutes) || (dAccum && dAccum.totalDurMin > maxDurationMinutes);
-      }).length;
+      // Count drivers/vehicles exceeding the configurable duration limit
+      const countExceedDur = drivers.filter(d => !d.isCancelled && d.durFinMin > maxDurationMinutes).length;
 
       const dkpiDurAlertCount = document.getElementById('dkpi-dur-alert-count');
       const dkpiDurAlertSub = document.getElementById('dkpi-dur-alert-sub');
@@ -2822,8 +2908,8 @@
       }
       if (dkpiDurAlertSub) {
         dkpiDurAlertSub.textContent = countExceedDur > 0
-          ? `${countExceedDur} ruta(s) exceden el límite de ${maxDurationHoursConfig}h`
-          : `Todas dentro del límite de ${maxDurationHoursConfig}h`;
+          ? `${countExceedDur} chofer(es) exceden el límite de ${maxDurationHoursConfig}h`
+          : `Todos dentro del límite de ${maxDurationHoursConfig}h`;
       }
 
       // Filter counts
@@ -2851,11 +2937,7 @@
 
       const filtered = drivers.filter(d => {
         if (currentDriverFilter === 'exceed_dur') {
-          if (d.isCancelled) return false;
-          const dAccum = driverAccumulated.get(d.driver);
-          const exceedsRoute = d.durFinMin > maxDurationMinutes;
-          const exceedsTotal = dAccum && dAccum.totalDurMin > maxDurationMinutes;
-          if (!exceedsRoute && !exceedsTotal) return false;
+          if (d.isCancelled || d.durFinMin <= maxDurationMinutes) return false;
         }
         if (currentDriverFilter === 'warn' && (d.isCancelled || d.condFinMin <= 270)) return false;
         if (currentDriverFilter === 'danger' && (d.isCancelled || d.condFinMin <= 540)) return false;
@@ -2864,10 +2946,11 @@
 
         if (query) {
           const matchDriver = (d.driver || '').toLowerCase().includes(query);
-          const matchPlate = (d.plate || '').toLowerCase().includes(query);
-          const matchRoute = (d.routeId || '').toLowerCase().includes(query);
+          const matchPlates = (d.plates || []).some(p => p.toLowerCase().includes(query));
+          const matchRoutes = (d.routes || []).some(r => r.toLowerCase().includes(query));
           const matchId = (d.driverId || '').toLowerCase().includes(query);
-          if (!matchDriver && !matchPlate && !matchRoute && !matchId) return false;
+          const matchExt = (d.extCode || '').toLowerCase().includes(query);
+          if (!matchDriver && !matchPlates && !matchRoutes && !matchId && !matchExt) return false;
         }
         return true;
       });
@@ -2875,8 +2958,8 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="13" style="text-align: center; padding: 32px; color: var(--text-muted);">
-              No se encontraron registros de choferes con el criterio seleccionado.
+            <td colspan="11" style="text-align: center; padding: 32px; color: var(--text-muted);">
+              No se encontraron registros de choferes o vehículos con el criterio seleccionado.
             </td>
           </tr>
         `;
@@ -2887,38 +2970,70 @@
         const tr = document.createElement('tr');
         const isExceedingDuration = !d.isCancelled && d.durFinMin > maxDurationMinutes;
 
-        // Accumulated driver data
-        const dAccum = driverAccumulated.get(d.driver) || { routesCount: 1, totalDurMin: d.durFinMin || 0, totalCondMin: d.condFinMin || 0 };
-        const driverTotalDurMin = dAccum.totalDurMin;
-        const routesCount = dAccum.routesCount;
-        const isExceedingDriverTotal = !d.isCancelled && driverTotalDurMin > maxDurationMinutes;
-        const isMultiRoute = routesCount > 1;
-
-        // Status badge
-        let badgeHtml = '';
-        if (d.isCancelled) {
-          badgeHtml = '<span class="gm-badge badge-sinasignar">Ruta Suprimida</span>';
+        // Driver column
+        let driverHtml = '';
+        if (d.isEvacor) {
+          driverHtml = `
+            <strong>${d.driver}</strong>
+            <div style="margin-top: 2px;"><span class="ext-tag">Transportista Externo</span></div>
+          `;
         } else {
-          // 1. Driving tachograph status
-          if (d.statusAlert === 'danger') {
-            badgeHtml += '<span class="gm-badge badge-tachograph-danger">🔴 &gt; 9h Conducción</span> ';
-          } else if (d.statusAlert === 'warn') {
-            badgeHtml += '<span class="gm-badge badge-tachograph-warn">🟡 &gt; 4.5h Conducción</span> ';
-          } else {
-            badgeHtml += '<span class="gm-badge badge-tachograph-ok">🟢 Conducción Óptima</span> ';
-          }
-
-          // 2. Configurable Duration Limit status
-          if (isExceedingDuration) {
-            badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Duración (&gt; ${maxDurationHoursConfig}h)</span>`;
-          } else if (isExceedingDriverTotal && isMultiRoute) {
-            badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Total Chofer (${formatMinutesToHuman(driverTotalDurMin)} &gt; ${maxDurationHoursConfig}h)</span>`;
-          } else if (d.isExtendedShift) {
-            badgeHtml += '<span class="gm-badge badge-tachograph-extended" style="margin-left: 2px;">🟣 Servicio &gt; 24h</span>';
-          }
+          const driverChangeNote = d.driverChanged
+            ? `<div style="font-size: 10px; color: var(--gm-orange); margin-top: 2px;">⇄ Reasignado de: ${d.driverInit}</div>`
+            : '';
+          driverHtml = `
+            <strong>${d.driver}</strong>
+            ${d.driverId ? `<span class="driver-id-badge">ID: ${d.driverId}</span>` : ''}
+            ${driverChangeNote}
+          `;
         }
 
-        // Cond diff badge
+        // Vehicle column
+        let vehHtml = '';
+        if (d.isEvacor) {
+          const extCodeDisplay = d.extCode ? `#${d.extCode}` : (d.plates[0] || 'Externo');
+          vehHtml = `
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span class="evacor-badge" title="Vehículo externo identificado en Hedyla por código #${d.extCode}">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                ${extCodeDisplay}
+              </span>
+              <span class="ext-tag">Externo</span>
+            </div>
+            <div style="font-size: 11px; font-weight: 600; color: #4338ca; margin-top: 3px;">
+              ${d.vehicleTypes.length > 0 ? d.vehicleTypes.join(' &bull; ') : 'Virtual / Externo'}
+            </div>
+          `;
+        } else {
+          vehHtml = `
+            <span class="veh-chip">${d.plates.join(', ')}</span>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${d.vehicleTypes.join(' &bull; ')}</div>
+          `;
+        }
+
+        // Routes column
+        let routesHtml = '';
+        if (d.routes.length <= 1) {
+          routesHtml = `<strong style="font-family: monospace; color: var(--gm-blue-dark);">${d.routes[0] || '-'}</strong>`;
+        } else {
+          routesHtml = `
+            <div class="routes-flex-wrap">
+              ${d.routes.map(r => `<span class="route-badge-pill" title="Ruta ${r}">${r}</span>`).join('')}
+            </div>
+            <div style="font-size: 10px; color: var(--gm-blue-light); font-weight: 700; margin-top: 2px;">
+              ∑ ${d.routesCount} rutas
+            </div>
+          `;
+        }
+
+        // Schedule pill
+        const scheduleHtml = `
+          <span class="schedule-pill" title="Horario inicio y fin planificado">
+            ${d.startTime || '--:--'} &rarr; ${d.endTime || '--:--'}
+          </span>
+        `;
+
+        // Driving diff badge
         let condDiffHtml = '-';
         if (!d.isCancelled && d.condInitMin !== null) {
           const cDiff = d.condDiffMin;
@@ -2927,7 +3042,7 @@
           condDiffHtml = `<span class="delta-badge ${badgeClass}">${sign}${formatMinutesToHuman(cDiff)}</span>`;
         }
 
-        // Dur diff badge
+        // Duration diff badge
         let durDiffHtml = '-';
         if (!d.isCancelled && d.durInitMin !== null) {
           const dDiff = d.durDiffMin;
@@ -2936,25 +3051,22 @@
           durDiffHtml = `<span class="delta-badge ${badgeClass}">${sign}${formatMinutesToHuman(dDiff)}</span>`;
         }
 
-        // Accumulated driver duration column content
-        let driverTotalDurHtml = '-';
-        if (!d.isCancelled) {
-          const durTotalColor = isExceedingDriverTotal ? '#b91c1c' : 'var(--gm-blue-dark)';
-          const countBadge = isMultiRoute
-            ? `<div style="font-size: 10px; color: var(--gm-blue-light); font-weight: 700; margin-top: 2px;">∑ Suma de ${routesCount} rutas</div>`
-            : `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(1 ruta)</div>`;
-          const alertBadge = isExceedingDriverTotal
-            ? `<span class="delta-badge delta-orange" style="font-size: 9px; margin-top: 2px; display: inline-block;" title="La duración acumulada del chofer (${formatMinutesToHuman(driverTotalDurMin)}) supera el límite de ${maxDurationHoursConfig}h">⚠️ Excede ${maxDurationHoursConfig}h</span>`
-            : '';
+        // Duration Total HTML (consolidated single duration column)
+        const durTotalColor = isExceedingDuration ? '#b91c1c' : 'var(--gm-blue-dark)';
+        const durAlertBadge = isExceedingDuration
+          ? `<span class="delta-badge delta-orange" style="font-size: 9px; margin-top: 2px; display: inline-block;" title="La duración total (${formatMinutesToHuman(d.durFinMin)}) supera el límite configurable de ${maxDurationHoursConfig}h">⚠️ &gt; ${maxDurationHoursConfig}h</span>`
+          : '';
+        const multiRouteNote = d.routesCount > 1
+          ? `<div style="font-size: 10px; color: var(--gm-blue-light); font-weight: 700; margin-top: 2px;">∑ Suma de ${d.routesCount} rutas</div>`
+          : '';
 
-          driverTotalDurHtml = `
-            <div style="font-weight: 800; font-size: 13px; color: ${durTotalColor};">
-              ${formatMinutesToHuman(driverTotalDurMin)}
-            </div>
-            ${countBadge}
-            ${alertBadge}
-          `;
-        }
+        const durTotalHtml = d.isCancelled ? '<span style="color: var(--text-muted);">-</span>' : `
+          <div style="font-weight: 800; font-size: 14px; color: ${durTotalColor};">
+            ${formatMinutesToHuman(d.durFinMin)}
+          </div>
+          ${multiRouteNote}
+          ${durAlertBadge}
+        `;
 
         // Operational time / delivery ratio
         let nonDrivingHtml = '-';
@@ -2965,48 +3077,46 @@
           `;
         }
 
-        const driverChangeNote = d.driverChanged
-          ? `<div style="font-size: 10px; color: var(--gm-orange); margin-top: 2px;">⇄ Reasignado de: ${d.driverInit}</div>`
-          : '';
+        // Status badges
+        let badgeHtml = '';
+        if (d.isCancelled) {
+          badgeHtml = '<span class="gm-badge badge-sinasignar">Ruta Suprimida</span>';
+        } else {
+          // Driving tachograph status
+          if (d.statusAlert === 'danger') {
+            badgeHtml += '<span class="gm-badge badge-tachograph-danger">🔴 &gt; 9h Conducción</span> ';
+          } else if (d.statusAlert === 'warn') {
+            badgeHtml += '<span class="gm-badge badge-tachograph-warn">🟡 &gt; 4.5h Conducción</span> ';
+          } else {
+            badgeHtml += '<span class="gm-badge badge-tachograph-ok">🟢 Conducción Óptima</span> ';
+          }
 
-        // Final duration with alert chip if exceeding configured limit
-        const durFinColor = isExceedingDuration ? '#b91c1c' : 'var(--gm-blue-dark)';
-        const durAlertChip = isExceedingDuration
-          ? `<span class="delta-badge delta-orange" style="font-size: 10px; margin-left: 4px;" title="Excede el límite configurable de ${maxDurationHoursConfig}h">⚠️ &gt; ${maxDurationHoursConfig}h</span>`
-          : '';
+          // Duration limit alert
+          if (isExceedingDuration) {
+            badgeHtml += `<span class="gm-badge badge-tachograph-danger" style="margin-left: 2px;">⚠️ Exceso Duración (&gt; ${maxDurationHoursConfig}h)</span> `;
+          } else if (d.isExtendedShift) {
+            badgeHtml += '<span class="gm-badge badge-tachograph-extended" style="margin-left: 2px;">🟣 Servicio &gt; 24h</span> ';
+          }
+
+          if (d.isEvacor) {
+            badgeHtml += `<span class="gm-badge badge-evacor-ext" style="margin-left: 2px;">Externo Evacor</span>`;
+          }
+        }
 
         tr.innerHTML = `
+          <td>${driverHtml}</td>
+          <td>${vehHtml}</td>
+          <td>${routesHtml}</td>
+          <td>${scheduleHtml}</td>
           <td>
-            <strong>${d.driver}</strong>
-            <span class="driver-id-badge">ID: ${d.driverId}</span>
-            ${driverChangeNote}
+            <span>${d.condInitMin !== null ? formatMinutesToHuman(d.condInitMin) : '-'}</span>
           </td>
           <td>
-            <span class="veh-chip">${d.plate}</span>
-            <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${d.vehicleType}</div>
-          </td>
-          <td><strong style="font-family: monospace; color: var(--gm-blue-dark);">${d.routeId}</strong></td>
-          <td>
-            <span class="schedule-pill" title="Horario inicio y fin planificado">
-              ${d.startTime || '--:--'} &rarr; ${d.endTime || '--:--'}
-            </span>
-          </td>
-          <td>
-            <span title="${d.condInitStr}">${d.condInitMin !== null ? formatMinutesToHuman(d.condInitMin) : '-'}</span>
-          </td>
-          <td>
-            <strong style="color: var(--gm-blue-dark);" title="${d.condFinStr}">${d.isCancelled ? 'Cancelada' : formatMinutesToHuman(d.condFinMin)}</strong>
+            <strong style="color: var(--gm-blue-dark);">${d.isCancelled ? 'Cancelada' : formatMinutesToHuman(d.condFinMin)}</strong>
           </td>
           <td>${condDiffHtml}</td>
-          <td>
-            <span title="${d.durInitStr}">${d.durInitMin !== null ? formatMinutesToHuman(d.durInitMin) : '-'}</span>
-          </td>
-          <td>
-            <strong style="color: ${durFinColor}; font-weight: 800;" title="${d.durFinStr}">${d.isCancelled ? '-' : formatMinutesToHuman(d.durFinMin)}</strong>
-            ${durAlertChip}
-          </td>
           <td style="background: rgba(3, 169, 236, 0.05); border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-            ${driverTotalDurHtml}
+            ${durTotalHtml}
           </td>
           <td>${durDiffHtml}</td>
           <td>${nonDrivingHtml}</td>
@@ -3024,7 +3134,7 @@
         tfoot.innerHTML = `
           <tr class="table-totals-row">
             <td colspan="4">
-              <strong>TOTALES CONSOLIDADOS (${activeCount} choferes activos &bull; ${metrics.countTachographAlerts} alertas)</strong>
+              <strong>TOTALES CONSOLIDADOS (${activeCount} choferes/vehículos activos &bull; ${metrics.countTachographAlerts} alertas)</strong>
             </td>
             <td><strong>${formatMinutesToHuman(metrics.totalDrivingInit, false, true)}</strong></td>
             <td><strong style="color: var(--gm-blue-dark); font-size: 13px;">${formatMinutesToHuman(metrics.totalDrivingFin, false, true)}</strong></td>
@@ -3033,8 +3143,6 @@
                 ${totalCondDiff >= 0 ? '+' : ''}${formatMinutesToHuman(totalCondDiff, false, true)}
               </span>
             </td>
-            <td><strong>${formatMinutesToHuman(metrics.totalDurInit, false, true)}</strong></td>
-            <td><strong style="color: var(--gm-blue-dark); font-size: 13px;">${formatMinutesToHuman(metrics.totalDurFin, false, true)}</strong></td>
             <td style="background: #cbd5e1 !important; color: var(--gm-blue-dark);">
               <strong style="font-size: 13px;" title="Duración acumulada de toda la flota">${formatMinutesToHuman(metrics.totalDurFin, false, true)}</strong>
             </td>
